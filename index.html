@@ -192,6 +192,8 @@ progress{
   const ov = document.getElementById("devBlockOverlay");
   function block(){
     ov.style.display="flex";
+    const troll=document.getElementById("trollArea");
+    if(troll && troll.innerHTML) _savedTrollHTML=troll.innerHTML; // save before clearing
     ["question","clues","trollArea","status"].forEach(id=>{
       const el=document.getElementById(id);
       if(el) el.innerHTML="";
@@ -202,6 +204,9 @@ progress{
   function unblock(){
     ov.style.display="none";
     renderQuestion(); updateClues();
+    // restore troll stage if it was showing
+    const troll=document.getElementById("trollArea");
+    if(troll && _savedTrollHTML) troll.innerHTML=_savedTrollHTML;
   }
 
   // Block keyboard shortcuts
@@ -231,7 +236,7 @@ progress{
   setInterval(function(){
     const s=performance.now();
     debugger;
-    if(performance.now()-s>100) block();
+    if(performance.now()-s>300) block(); // raised from 100→300ms to avoid false positives
   },1000);
 })();
 
@@ -258,13 +263,14 @@ const _S=[
 
 let current=0, unlocked=[], currentCode="";
 let _busy=false; // global lock — prevents any function running twice at once
+let _savedTrollHTML=""; // save troll stage HTML across block/unblock
 
 function _lock(fn){
   return function(){
     if(_busy) return;
     _busy=true;
     try{ fn.apply(this,arguments); }
-    finally{ /* _busy released in unlockStage or on error path */ }
+    catch(e){ _busy=false; throw e; } // release lock on unexpected error
   };
 }
 function _release(){ _busy=false; }
@@ -362,6 +368,7 @@ function unlockStage(){
   document.getElementById("answer").value="";
   document.getElementById("status").innerHTML="<span class='success'>ปลดล็อกสำเร็จ</span>";
   document.getElementById("trollArea").innerHTML="";
+  _savedTrollHTML=""; // troll stage done, clear saved state
   setAnswerBtn(false);
   _busy=false; // release lock after stage is fully done
 }
