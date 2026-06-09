@@ -4,350 +4,232 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ไม่บอก</title>
-
 <style>
-	
-body {
-    user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-}
-body{
-    background:#0d1117;
-    color:#e6edf3;
-    font-family:sans-serif;
-    max-width:900px;
-    margin:auto;
-    padding:20px;
-}
-
-.card{
-    background:#161b22;
-    border:1px solid #30363d;
-    border-radius:12px;
-    padding:20px;
-    margin-top:20px;
-}
-
-input{
-    width:100%;
-    padding:10px;
-    margin-top:10px;
-    background:#21262d;
-    color:white;
-    border:1px solid #444;
-}
-
-button{
-    margin-top:10px;
-    padding:10px 15px;
-    background:#238636;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#2ea043;
-}
-
-#clues{
-    white-space:pre-wrap;
-    color:#58a6ff;
-}
-
-.success{ color:#3fb950; }
-.error{ color:#ff7b72; }
+body{user-select:none;-webkit-user-select:none;-ms-user-select:none;}
+body{background:#0d1117;color:#e6edf3;font-family:sans-serif;max-width:900px;margin:auto;padding:20px;}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;margin-top:20px;}
+input{width:100%;padding:10px;margin-top:10px;background:#21262d;color:white;border:1px solid #444;}
+button{margin-top:10px;padding:10px 15px;background:#238636;color:white;border:none;border-radius:8px;cursor:pointer;}
+button:hover{background:#2ea043;}
+#clues{white-space:pre-wrap;color:#58a6ff;}
+.success{color:#3fb950;}.error{color:#ff7b72;}
+#devBlockOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0d1117;z-index:99999;justify-content:center;align-items:center;flex-direction:column;text-align:center;}
+#devBlockOverlay h1{font-size:3em;color:#ff7b72;}
+#devBlockOverlay p{color:#8b949e;}
 </style>
 </head>
-
 <body>
 
+<div id="devBlockOverlay">
+  <h1>🚫 ห้ามเข้า</h1>
+  <p>ตรวจพบการเปิด Developer Tools<br>กรุณาปิด DevTools แล้วรีเฟรชหน้า</p>
+</div>
+
 <h1>🔒 ห้องปริศนา</h1>
-
 <div class="card">
-<h2 id="question"></h2>
-
-<input id="answer" autocomplete="off" >
-<button onclick="checkAnswer()">ตอบ</button>
-
-<p id="status"></p>
+  <h2 id="question"></h2>
+  <input id="answer" autocomplete="off">
+  <button onclick="checkAnswer()">ตอบ</button>
+  <p id="status"></p>
 </div>
-
 <div class="card">
-<h3>ชิ้นส่วนที่ปลดล็อกแล้ว</h3>
-<div id="clues"></div>
+  <h3>ชิ้นส่วนที่ปลดล็อกแล้ว</h3>
+  <div id="clues"></div>
 </div>
-
 <div id="trollArea"></div>
 
 <script>
+// ── DEVTOOLS DETECTION ──
+(function(){
+  const ov = document.getElementById("devBlockOverlay");
+  function block(){
+    ov.style.display="flex";
+    ["question","clues","trollArea","status"].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.innerHTML="";
+    });
+    const a=document.getElementById("answer");
+    if(a) a.value="";
+  }
+  function unblock(){
+    ov.style.display="none";
+    renderQuestion(); updateClues();
+  }
 
-/* ---------- STAGES ---------- */
+  // Block keyboard shortcuts
+  document.addEventListener("keydown",function(e){
+    if(e.key==="F12"||(e.ctrlKey&&e.shiftKey&&/^[ijcIJC]$/.test(e.key))||(e.ctrlKey&&/^[uU]$/.test(e.key))){
+      e.preventDefault(); e.stopPropagation(); block(); return false;
+    }
+  },true);
 
-document.addEventListener("contextmenu", e => e.preventDefault());
+  document.addEventListener("contextmenu",e=>e.preventDefault());
+  document.addEventListener("copy",e=>e.preventDefault());
+  document.addEventListener("cut",e=>e.preventDefault());
+  document.addEventListener("paste",e=>e.preventDefault());
+  document.addEventListener("selectstart",e=>e.preventDefault());
 
-document.addEventListener("copy", e => e.preventDefault());
-document.addEventListener("cut", e => e.preventDefault());
-document.addEventListener("paste", e => e.preventDefault());
-document.addEventListener("selectstart", e => e.preventDefault());
-const stages = [
-{
-q:"54 68 61 69 6C 61 6E 64",
-a:"Thailand",
-clue:"00110101 00110101"
-},
-{
-q:"Q2hhdEdQVA==",
-a:"ChatGPT",
-clue:"00111000 00110100"
-},
-{
-q:"01000111 01001001 01000110 01010100 01000101 01000100 00100000 01000011 01001111 01001101 01010000 01010101 01010100 01000101 01010010",
-a:"GIFTED COMPUTER",
-clue:"01000110 01100010"
-},
-{
-q:"FRPSXWHU",
-a:"COMPUTER",
-clue:"01101001 01011011"
+  // Window size devtools detection
+  const th=160;
+  setInterval(function(){
+    if(window.outerWidth-window.innerWidth>th||window.outerHeight-window.innerHeight>th){
+      block();
+    } else {
+      if(ov.style.display==="flex") unblock();
+    }
+  },500);
+
+  // Console open detection via debugger timing
+  setInterval(function(){
+    const s=performance.now();
+    debugger;
+    if(performance.now()-s>100) block();
+  },1000);
+})();
+
+// ── CRYPTO ──
+// Key is split and assembled at runtime so it never appears as a literal string
+const _k = (()=>{ const p=["x9","Z!","mQ"]; return p.join(""); })();
+
+function _x(s,k){
+  let o="";
+  for(let i=0;i<s.length;i++) o+=String.fromCharCode(s.charCodeAt(i)^k.charCodeAt(i%k.length));
+  return o;
 }
+function _d(s){ return _x(atob(s),_k); }
+
+// ── STAGE DATA — no plain-text answers or clues anywhere ──
+// All values are pre-encrypted; raw answers DO NOT appear in this file.
+const _S=[
+  {qRaw:"54 68 61 69 6C 61 6E 64",          _a:"LFE7SAEwFl0=",            _c:"SAlrEF1gSAh6EV1gSQlrEVw="},
+  {qRaw:"Q2hhdEdQVA==",                      _a:"O1E7VSoBLA==",            _c:"SAlrEFxhSAl6EV1gSQlrEV0="},
+  {qRaw:"01000111 01001001 01000110 01010100 01000101 01000100 00100000 01000011 01001111 01001101 01010000 01010101 01010100 01000101 01010010",
+                                              _a:"P3AcdSgVWHoVbD0ELHwI",    _c:"SAhqEV1gSQl6EVxgSAlqEF0="},
+  {qRaw:"FRPSXWHU",                          _a:"O3YXcTgFPWs=",            _c:"SAhrEVxhSAh6EVxhSQhqEFw="}
 ];
 
-let current = 0;
-let unlocked = [];
-let currentCode = "";
+let current=0, unlocked=[], currentCode="";
+let _busy=false; // global lock — prevents any function running twice at once
 
-/* ---------- UI ---------- */
+function _lock(fn){
+  return function(){
+    if(_busy) return;
+    _busy=true;
+    try{ fn.apply(this,arguments); }
+    finally{ /* _busy released in unlockStage or on error path */ }
+  };
+}
+function _release(){ _busy=false; }
 
 function renderQuestion(){
-
-if(current >= stages.length){
-document.getElementById("question").innerText = "ภารกิจเสร็จสิ้น";
-document.getElementById("answer").style.display="none";
-return;
+  if(current>=_S.length){
+    document.getElementById("question").innerText="ภารกิจเสร็จสิ้น";
+    document.getElementById("answer").style.display="none";
+    return;
+  }
+  document.getElementById("question").innerText="ข้อ "+(current+1)+": "+_S[current].qRaw;
 }
-
-document.getElementById("question").innerText =
-"ข้อ " + (current+1) + ": " + stages[current].q;
-
-}
-
 function updateClues(){
-
-let text="";
-
-for(let i=0;i<stages.length;i++){
-text += unlocked[i]
-? "ส่วนที่ "+(i+1)+"\n"+unlocked[i]+"\n\n"
-: "ส่วนที่ "+(i+1)+" : [ล็อก]\n\n";
+  let t="";
+  for(let i=0;i<_S.length;i++){
+    t+=unlocked[i]?"ส่วนที่ "+(i+1)+"\n"+_d(unlocked[i])+"\n\n":"ส่วนที่ "+(i+1)+" : [ล็อก]\n\n";
+  }
+  document.getElementById("clues").innerText=t;
 }
+function normalize(s){ return s.trim().toLowerCase(); }
 
-document.getElementById("clues").innerText=text;
-
+// ── disable/enable the main answer button ──
+function setAnswerBtn(disabled){
+  const btn=document.querySelector('.card button');
+  if(btn) btn.disabled=disabled;
 }
-
-function normalize(str){
-return str.trim().toLowerCase();
-}
-
-/* ---------- CHECK ---------- */
 
 function checkAnswer(){
-
-const user = normalize(document.getElementById("answer").value);
-const correct = normalize(stages[current].a);
-
-if(user === correct){
-startTrollStage();
-}else{
-document.getElementById("status").innerHTML =
-"<span class='error'>คำตอบไม่ถูกต้อง</span>";
+  if(_busy) return;
+  const user=normalize(document.getElementById("answer").value);
+  const correct=normalize(_d(_S[current]._a));
+  if(user===correct){
+    _busy=true;
+    setAnswerBtn(true);
+    startTrollStage();
+  } else {
+    document.getElementById("status").innerHTML="<span class='error'>คำตอบไม่ถูกต้อง</span>";
+  }
 }
-
-}
-
-/* ---------- UNLOCK ---------- */
 
 function unlockStage(){
-
-unlocked[current] = stages[current].clue;
-current++;
-
-updateClues();
-renderQuestion();
-
-document.getElementById("answer").value="";
-document.getElementById("status").innerHTML =
-"<span class='success'>ปลดล็อกสำเร็จ</span>";
-
-document.getElementById("trollArea").innerHTML="";
-
+  unlocked[current]=_S[current]._c;
+  current++;
+  updateClues(); renderQuestion();
+  document.getElementById("answer").value="";
+  document.getElementById("status").innerHTML="<span class='success'>ปลดล็อกสำเร็จ</span>";
+  document.getElementById("trollArea").innerHTML="";
+  setAnswerBtn(false);
+  _busy=false; // release lock after stage is fully done
 }
-
-/* ---------- TROLL FLOW ---------- */
 
 function startTrollStage(){
-
-const mode = current % 5;
-
-if(mode === 0) fakeAd();
-else if(mode === 1) fakeAI();
-else if(mode === 2) runawayButton();
-else if(mode === 3) fakeLoading();
-else codeGate();
-
+  const m=current%5;
+  if(m===0)fakeAd();
+  else if(m===1)fakeAI();
+  else if(m===2)runawayButton();
+  else if(m===3)fakeLoading();
+  else codeGate();
 }
-
-/* ---------- FAKE AD ---------- */
 
 function fakeAd(){
-
-let sec = 3;
-
-document.getElementById("trollArea").innerHTML=`
-<div class="card">
-<h3>📺 โปรดรอสักครู่...</h3>
-<p id="count">${sec}</p>
-</div>`;
-
-let t=setInterval(()=>{
-sec--;
-document.getElementById("count").innerText=sec;
-
-if(sec<=0){
-clearInterval(t);
-unlockStage();
+  let sec=60, done=false;
+  document.getElementById("trollArea").innerHTML=`<div class="card"><h3>📺 โปรดรอสักครู่...</h3><p id="count">${sec}</p></div>`;
+  let t=setInterval(()=>{
+    sec--;
+    document.getElementById("count").innerText=sec;
+    if(sec<=0 && !done){ done=true; clearInterval(t); unlockStage(); }
+  },1000);
 }
-
-},1000);
-
-}
-
-/* ---------- FAKE AI (แก้แล้ว = ใช้โค้ด 12 ตัว) ---------- */
 
 function fakeAI(){
-
-generateCode();
-
-document.getElementById("trollArea").innerHTML=`
-<div class="card">
-<h3>🤖 AI VERIFICATION</h3>
-
-<p>พิมพ์รหัสนี้:</p>
-<h2 style="color:#ffcc00">${currentCode}</h2>
-
-<input id="humanInput" placeholder="50 ตัวอักษร">
-
-<button onclick="verifyHuman()">ยืนยัน</button>
-</div>`;
+  generateCode();
+  document.getElementById("trollArea").innerHTML=`<div class="card"><h3>🤖 AI VERIFICATION</h3><p>พิมพ์รหัสนี้:</p><h2 style="color:#ffcc00">${currentCode}</h2><input id="humanInput" placeholder="50 ตัวอักษร"><button onclick="verifyHuman()">ยืนยัน</button></div>`;
 }
-
 function verifyHuman(){
-
-const user = document.getElementById("humanInput").value.trim();
-
-if(user === currentCode){
-unlockStage();
-}else{
-alert("❌ AI DETECTED");
+  if(document.getElementById("humanInput").value.trim()===currentCode) unlockStage();
+  else alert("❌ AI DETECTED");
 }
-
-}
-
-/* ---------- RUNAWAY BUTTON ---------- */
 
 function runawayButton(){
-
-document.getElementById("trollArea").innerHTML=`
-<div class="card">
-<h3>🎯 จับปุ่มให้ได้</h3>
-<button id="runaway">กดฉัน</button>
-</div>`;
-
-const btn = document.getElementById("runaway");
-
-btn.addEventListener("mouseenter",()=>{
-btn.style.position="relative";
-btn.style.left=Math.random()*300+"px";
-btn.style.top=Math.random()*100+"px";
-});
-
-btn.onclick = unlockStage;
-
+  document.getElementById("trollArea").innerHTML=`<div class="card"><h3>🎯 จับปุ่มให้ได้</h3><button id="runaway">กดฉัน</button></div>`;
+  const btn=document.getElementById("runaway");
+  let caught=false;
+  btn.addEventListener("mouseenter",()=>{ btn.style.position="relative"; btn.style.left=Math.random()*300+"px"; btn.style.top=Math.random()*100+"px"; });
+  btn.onclick=()=>{ if(caught) return; caught=true; btn.disabled=true; unlockStage(); };
 }
-
-/* ---------- FAKE LOADING ---------- */
 
 function fakeLoading(){
-
-document.getElementById("trollArea").innerHTML=`
-<div class="card">
-<h3>⏳ Processing...</h3>
-<progress id="bar" value="0" max="100"></progress>
-</div>`;
-
-let p=0;
-
-let t=setInterval(()=>{
-p+=Math.random()*1;
-document.getElementById("bar").value=p;
-
-if(p>=100){
-clearInterval(t);
-unlockStage();
+  document.getElementById("trollArea").innerHTML=`<div class="card"><h3>⏳ Processing...</h3><progress id="bar" value="0" max="100"></progress></div>`;
+  let p=0, done=false;
+  let t=setInterval(()=>{
+    p+=Math.random();
+    document.getElementById("bar").value=p;
+    if(p>=100 && !done){ done=true; clearInterval(t); unlockStage(); }
+  },200);
 }
-
-},200);
-
-}
-
-/* ---------- CODE 12 CHAR ---------- */
 
 function generateCode(){
-const chars="!#$%&'()*+,-./0123456789:;<=>?@[\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzกขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ";
-let code="";
-for(let i=0;i<50;i++){
-code += chars[Math.floor(Math.random()*chars.length)];
-}
-currentCode=code;
+  const chars="!#$%&'()*+,-./0123456789:;<=>?@[\\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzกขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ";
+  let c=""; for(let i=0;i<50;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  currentCode=c;
 }
 
 function codeGate(){
-
-generateCode();
-
-document.getElementById("trollArea").innerHTML=`
-<div class="card">
-<h3>🔐 VERIFY CODE</h3>
-
-<p>พิมพ์รหัสให้ตรง:</p>
-<h2 style="color:#ffcc00">${currentCode}</h2>
-
-<input id="codeInput">
-<button onclick="checkCode()">ยืนยัน</button>
-</div>`;
+  generateCode();
+  document.getElementById("trollArea").innerHTML=`<div class="card"><h3>🔐 VERIFY CODE</h3><p>พิมพ์รหัสให้ตรง:</p><h2 style="color:#ffcc00">${currentCode}</h2><input id="codeInput"><button onclick="checkCode()">ยืนยัน</button></div>`;
 }
-
 function checkCode(){
-
-const user = document.getElementById("codeInput").value.trim();
-
-if(user === currentCode){
-unlockStage();
-}else{
-alert("❌ WRONG CODE");
+  if(document.getElementById("codeInput").value.trim()===currentCode) unlockStage();
+  else alert("❌ WRONG CODE");
 }
 
-}
-
-/* ---------- START ---------- */
-
-renderQuestion();
-updateClues();
-
+renderQuestion(); updateClues();
 </script>
-
 </body>
 </html>
