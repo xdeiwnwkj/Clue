@@ -138,7 +138,28 @@ progress{
 @media(max-width:480px){
   body{padding:12px 10px;}
   .card{padding:14px 12px;}
-  button{width:100%;}
+  button:not(.copy-btn){width:100%;}
+}
+
+/* Copy button — responsive overrides */
+.copy-btn{
+  margin-left:0;
+  margin-top:0;
+  min-height:36px;
+  padding:6px 12px;
+  font-size:clamp(0.75rem,3vw,0.85rem);
+  white-space:nowrap;
+}
+
+/* Question row: keep copy-btn aligned to top-right, wraps on very small screens */
+.question-row{
+  align-items:flex-start;
+  row-gap:6px;
+}
+
+/* Clue header copy btn — always stays right, never stretches */
+.clue-header .copy-btn{
+  flex-shrink:0;
 }
 </style>
 </head>
