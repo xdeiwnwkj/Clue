@@ -534,10 +534,24 @@ let _hintClicks = 0;
 const HINT_TARGET = 100;
 
 function getHintText(idx){
-  // Decode the actual answer, then show it as spaced hex bytes
   const answer = _d(_S[idx]._a);
-  const hex = answer.split('').map(c => c.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0')).join(' ');
-  return hex;
+  if(idx === 0){
+    // HEX — spaced uppercase hex bytes
+    return answer.split('').map(c => c.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0')).join(' ');
+  } else if(idx === 1){
+    // BASE64
+    return btoa(answer);
+  } else if(idx === 2){
+    // BINARY — spaced 8-bit bytes
+    return answer.split('').map(c => c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
+  } else if(idx === 3){
+    // Caesar ROT13
+    return answer.replace(/[a-zA-Z]/g, c => {
+      const base = c <= 'Z' ? 65 : 97;
+      return String.fromCharCode((c.charCodeAt(0) - base + 13) % 26 + base);
+    });
+  }
+  return answer;
 }
 
 function hintClick(){
@@ -554,8 +568,9 @@ function hintClick(){
     bar.className = "hint-progress-bar ready";
     btn.className = "hint-btn ready";
     btn.innerHTML = "💡 คำใบ้ปลดล็อกแล้ว!";
+    const labels = ["HEX","BASE64","BINARY","CAESAR (ROT13)"];
     box.style.display = "block";
-    box.innerHTML = `<span style="color:#8b949e;font-size:0.78rem;display:block;margin-bottom:4px;">HEX</span>${getHintText(current)}`;
+    box.innerHTML = `<span style="color:#8b949e;font-size:0.78rem;display:block;margin-bottom:4px;">${labels[current]}</span>${getHintText(current)}`;
   } else {
     bar.className = "hint-progress-bar" + (isAlmost ? " almost" : "");
     btn.className = "hint-btn" + (isAlmost ? " almost" : "");
