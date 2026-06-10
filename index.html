@@ -237,7 +237,7 @@ progress{
   <button onclick="checkAnswer()">ตอบ</button>
   <p id="status"></p>
   <div>
-    <button class="hint-btn" id="hintBtn" onclick="hintClick()">💡 คลิก 100 ครั้งเพื่อดูคำใบ้ <span id="hintCount">(0/100)</span></button>
+    <button class="hint-btn" id="hintBtn" onclick="hintClick()">💡 คลิก 300 ครั้งเพื่อดูคำใบ้ <span id="hintCount">(0/300)</span></button>
     <div class="hint-progress-wrap"><div class="hint-progress-bar" id="hintBar"></div></div>
     <div class="hint-box" id="hintBox"></div>
   </div>
@@ -531,7 +531,7 @@ function checkCode(){
 
 // ── HINT SYSTEM ──
 let _hintClicks = 0;
-const HINT_TARGET = 100;
+const HINT_TARGET = 300;
 
 function getHintText(idx){
   const answer = _d(_S[idx]._a);
@@ -560,7 +560,7 @@ function hintClick(){
   const bar = document.getElementById("hintBar");
   const btn = document.getElementById("hintBtn");
   const box = document.getElementById("hintBox");
-  const isAlmost = _hintClicks >= 70;
+  const isAlmost = _hintClicks >= 210;
 
   bar.style.width = pct + "%";
 
@@ -574,7 +574,7 @@ function hintClick(){
   } else {
     bar.className = "hint-progress-bar" + (isAlmost ? " almost" : "");
     btn.className = "hint-btn" + (isAlmost ? " almost" : "");
-    btn.innerHTML = `💡 คลิก 100 ครั้งเพื่อดูคำใบ้ <span id="hintCount">(${_hintClicks}/100)</span>`;
+    btn.innerHTML = `💡 คลิก 300 ครั้งเพื่อดูคำใบ้ <span id="hintCount">(${_hintClicks}/300)</span>`;
   }
 }
 
@@ -584,7 +584,7 @@ function resetHint(){
   const btn = document.getElementById("hintBtn");
   const box = document.getElementById("hintBox");
   if(bar){ bar.style.width = "0%"; bar.className = "hint-progress-bar"; }
-  if(btn){ btn.className = "hint-btn"; btn.innerHTML = `💡 คลิก 100 ครั้งเพื่อดูคำใบ้ <span id="hintCount">(0/100)</span>`; }
+  if(btn){ btn.className = "hint-btn"; btn.innerHTML = `💡 คลิก 300 ครั้งเพื่อดูคำใบ้ <span id="hintCount">(0/300)</span>`; }
   if(box){ box.style.display = "none"; box.textContent = ""; }
 }
 
