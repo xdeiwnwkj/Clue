@@ -220,13 +220,9 @@ async function checkAnswer(){
     "X-Key":"my-super-secret-key-123"
   },
 
-
   body:JSON.stringify({
-
     stage: current,
-
     answer:userAnswer
-
   })
 
 });
@@ -252,10 +248,19 @@ async function checkAnswer(){
 async function fetchHint(){
   try {
     const res = await fetch(API_URL + "/hint", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stage: current })
-    });
+
+  method:"POST",
+
+  headers:{
+    "Content-Type":"application/json",
+    "X-Key":"my-super-secret-key-123"
+  },
+
+  body:JSON.stringify({
+    stage:current
+  })
+
+});
     const data = await res.json();
     return data.hint || "?";
   } catch(e) { return "เชื่อมต่อไม่ได้"; }
