@@ -212,10 +212,24 @@ async function checkAnswer(){
 
   try {
     const res = await fetch(API_URL + "/check", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stage: current, answer: userAnswer })
-    });
+
+  method:"POST",
+
+  headers:{
+    "Content-Type":"application/json",
+    "X-Key":"my-super-secret-key-123"
+  },
+
+
+  body:JSON.stringify({
+
+    stage: current,
+
+    answer:userAnswer
+
+  })
+
+});
     const data = await res.json();
 
     if(data.correct){
