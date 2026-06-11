@@ -19,205 +19,42 @@ body{
 h1{font-size:clamp(1.4rem,5vw,2rem);margin:0 0 4px;}
 h2{font-size:clamp(1rem,4vw,1.4rem);word-break:break-word;}
 h3{font-size:clamp(0.95rem,3.5vw,1.2rem);}
-
-.card{
-  background:#161b22;
-  border:1px solid #30363d;
-  border-radius:12px;
-  padding:clamp(14px,4vw,24px);
-  margin-top:16px;
-}
-
-input{
-  width:100%;
-  padding:10px 12px;
-  margin-top:10px;
-  background:#21262d;
-  color:white;
-  border:1px solid #444;
-  border-radius:6px;
-  font-size:1rem;
-  /* prevent iOS zoom on focus (font-size must be >=16px) */
-  font-size:max(16px, 1rem);
-}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:clamp(14px,4vw,24px);margin-top:16px;}
+input{width:100%;padding:10px 12px;margin-top:10px;background:#21262d;color:white;border:1px solid #444;border-radius:6px;font-size:max(16px,1rem);}
 input:focus{outline:2px solid #58a6ff;border-color:#58a6ff;}
-
-button{
-  margin-top:10px;
-  padding:10px 18px;
-  background:#238636;
-  color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:1rem;
-  /* tap-target: at least 44px tall on mobile */
-  min-height:44px;
-  touch-action:manipulation;
-}
+button{margin-top:10px;padding:10px 18px;background:#238636;color:white;border:none;border-radius:8px;cursor:pointer;font-size:1rem;min-height:44px;touch-action:manipulation;}
 button:hover{background:#2ea043;}
 button:disabled{opacity:0.5;cursor:not-allowed;}
-
-progress{
-  width:100%;
-  height:12px;
-  border-radius:6px;
-  margin-top:10px;
-}
-
+progress{width:100%;height:12px;border-radius:6px;margin-top:10px;}
 .success{color:#3fb950;}
 .error{color:#ff7b72;}
-
-/* Copy button */
-.copy-btn{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  margin-left:8px;
-  padding:4px 10px;
-  background:#21262d;
-  color:#8b949e;
-  border:1px solid #30363d;  
-  border-radius:6px;
-  cursor:pointer;
-  font-size:0.78rem;
-  min-height:28px;
-  vertical-align:middle;
-  touch-action:manipulation;
-  transition:color .15s,border-color .15s;
-}
+.copy-btn{display:inline-flex;align-items:center;gap:6px;margin-left:0;margin-top:0;padding:6px 12px;background:#21262d;color:#8b949e;border:1px solid #30363d;border-radius:6px;cursor:pointer;font-size:clamp(0.75rem,3vw,0.85rem);min-height:36px;vertical-align:middle;touch-action:manipulation;transition:color .15s,border-color .15s;white-space:nowrap;flex-shrink:0;}
 .copy-btn:hover{color:#e6edf3;border-color:#58a6ff;}
 .copy-btn.copied{color:#3fb950;border-color:#3fb950;}
-
-/* Question row */
-.question-row{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+.question-row{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;row-gap:6px;}
 .question-row h2{margin:0;flex:1;min-width:0;}
-
-/* Clue item */
-.clue-item{
-  background:#0d1117;
-  border:1px solid #30363d;
-  border-radius:8px;
-  padding:10px 12px;
-  margin-bottom:10px;
-}
+.clue-item{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
 .clue-item.locked{color:#484f58;}
 .clue-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;}
 .clue-label{font-weight:600;font-size:0.9rem;}
 .clue-text{color:#58a6ff;font-size:clamp(0.85rem,3vw,1rem);word-break:break-word;overflow-wrap:anywhere;white-space:pre-wrap;}
-
-/* Runaway button container — constrain so button can't escape off-screen */
 #trollArea .card{overflow:hidden;position:relative;}
 #runaway{position:relative;}
-
-/* DevTools overlay */
-#devBlockOverlay{
-  display:none;
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:#0d1117;
-  z-index:99999;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  text-align:center;
-  padding:20px;
-}
+#devBlockOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0d1117;z-index:99999;justify-content:center;align-items:center;flex-direction:column;text-align:center;padding:20px;}
 #devBlockOverlay h1{font-size:clamp(1.8rem,8vw,3rem);color:#ff7b72;}
 #devBlockOverlay p{color:#8b949e;font-size:clamp(0.9rem,3vw,1rem);}
-
-/* Troll: AI verification — wrap long code */
-#trollArea h2{
-  word-break:break-all;
-  overflow-wrap:anywhere;
-  font-size:clamp(0.85rem,3vw,1.4rem);
-  line-height:1.5;
-}
-
-@media(max-width:480px){
-  body{padding:12px 10px;}
-  .card{padding:14px 12px;}
-  button:not(.copy-btn){width:100%;}
-}
-
-/* Copy button — responsive overrides */
-.copy-btn{
-  margin-left:0;
-  margin-top:0;
-  min-height:36px;
-  padding:6px 12px;
-  font-size:clamp(0.75rem,3vw,0.85rem);
-  white-space:nowrap;
-}
-
-/* Hint button */
-.hint-btn{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  margin-top:10px;
-  padding:8px 14px;
-  background:#21262d;
-  color:#8b949e;
-  border:1px solid #30363d;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:0.88rem;
-  min-height:44px;
-  touch-action:manipulation;
-  transition:color .15s,border-color .15s,background .15s;
-  user-select:none;
-  -webkit-user-select:none;
-}
+#trollArea h2{word-break:break-all;overflow-wrap:anywhere;font-size:clamp(0.85rem,3vw,1.4rem);line-height:1.5;}
+@media(max-width:480px){body{padding:12px 10px;}.card{padding:14px 12px;}button:not(.copy-btn){width:100%;}}
+.hint-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:8px 14px;background:#21262d;color:#8b949e;border:1px solid #30363d;border-radius:8px;cursor:pointer;font-size:0.88rem;min-height:44px;touch-action:manipulation;transition:color .15s,border-color .15s,background .15s;user-select:none;-webkit-user-select:none;}
 .hint-btn:hover{color:#e6edf3;border-color:#8b949e;}
 .hint-btn.almost{border-color:#f0883e;color:#f0883e;}
 .hint-btn.ready{background:#1c2a1c;border-color:#3fb950;color:#3fb950;}
-
-.hint-progress-wrap{
-  width:100%;
-  height:4px;
-  background:#21262d;
-  border-radius:2px;
-  margin-top:6px;
-  overflow:hidden;
-}
-.hint-progress-bar{
-  height:100%;
-  width:0%;
-  background:#58a6ff;
-  border-radius:2px;
-  transition:width .1s,background .1s;
-}
+.hint-progress-wrap{width:100%;height:4px;background:#21262d;border-radius:2px;margin-top:6px;overflow:hidden;}
+.hint-progress-bar{height:100%;width:0%;background:#58a6ff;border-radius:2px;transition:width .1s,background .1s;}
 .hint-progress-bar.almost{background:#f0883e;}
 .hint-progress-bar.ready{background:#3fb950;}
-
-.hint-box{
-  display:none;
-  margin-top:10px;
-  padding:10px 12px;
-  background:#0d1117;
-  border:1px solid #3fb950;
-  border-radius:8px;
-  color:#3fb950;
-  font-size:0.95rem;
-  word-break:break-word;
-  overflow-wrap:anywhere;
-  white-space:pre-wrap;
-  animation:fadeIn .4s ease;
-}
+.hint-box{display:none;margin-top:10px;padding:10px 12px;background:#0d1117;border:1px solid #3fb950;border-radius:8px;color:#3fb950;font-size:0.95rem;word-break:break-word;overflow-wrap:anywhere;white-space:pre-wrap;animation:fadeIn .4s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
-
-/* Question row: keep copy-btn aligned to top-right, wraps on very small screens */
-.question-row{
-  align-items:flex-start;
-  row-gap:6px;
-}
-
-/* Clue header copy btn — always stays right, never stretches */
-.clue-header .copy-btn{
-  flex-shrink:0;
-}
 </style>
 </head>
 <body>
@@ -241,21 +78,27 @@ progress{
     <div class="hint-progress-wrap"><div class="hint-progress-bar" id="hintBar"></div></div>
     <div class="hint-box" id="hintBox"></div>
   </div>
+</div>
 <div class="card">
   <h3>ชิ้นส่วนที่ปลดล็อกแล้ว</h3>
   <div id="clues"></div>
-  <h5>Hint:🌐 🔄 + haha  <h5>
+  <h5>Hint:🌐 🔄 + haha</h5>
 </div>
 <div id="trollArea"></div>
 
 <script>
+// ─────────────────────────────────────────
+// IMPORTANT: Replace this URL after you deploy the Worker on Cloudflare!
+// ─────────────────────────────────────────
+const API_URL = "https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev";
+
 // ── DEVTOOLS DETECTION ──
 (function(){
   const ov = document.getElementById("devBlockOverlay");
   function block(){
     ov.style.display="flex";
     const troll=document.getElementById("trollArea");
-    if(troll && troll.innerHTML) _savedTrollHTML=troll.innerHTML; // save before clearing
+    if(troll && troll.innerHTML) _savedTrollHTML=troll.innerHTML;
     ["question","clues","trollArea","status"].forEach(id=>{
       const el=document.getElementById(id);
       if(el) el.innerHTML="";
@@ -266,25 +109,19 @@ progress{
   function unblock(){
     ov.style.display="none";
     renderQuestion(); updateClues();
-    // restore troll stage if it was showing
     const troll=document.getElementById("trollArea");
     if(troll && _savedTrollHTML) troll.innerHTML=_savedTrollHTML;
   }
-
-  // Block keyboard shortcuts
   document.addEventListener("keydown",function(e){
     if(e.key==="F12"||(e.ctrlKey&&e.shiftKey&&/^[ijcIJC]$/.test(e.key))||(e.ctrlKey&&/^[uU]$/.test(e.key))){
       e.preventDefault(); e.stopPropagation(); block(); return false;
     }
   },true);
-
   document.addEventListener("contextmenu",e=>e.preventDefault());
   document.addEventListener("copy",e=>e.preventDefault());
   document.addEventListener("cut",e=>e.preventDefault());
   document.addEventListener("paste",e=>e.preventDefault());
   document.addEventListener("selectstart",e=>e.preventDefault());
-
-  // Window size devtools detection
   const th=160;
   setInterval(function(){
     if(window.outerWidth-window.innerWidth>th||window.outerHeight-window.innerHeight>th){
@@ -293,71 +130,48 @@ progress{
       if(ov.style.display==="flex") unblock();
     }
   },500);
-
-  // Console open detection via debugger timing
   setInterval(function(){
     const s=performance.now();
     debugger;
-    if(performance.now()-s>300) block(); // raised from 100→300ms to avoid false positives
+    if(performance.now()-s>300) block();
   },1000);
 })();
 
-// ── CRYPTO ──
-// Key is split and assembled at runtime so it never appears as a literal string
-const _k = (()=>{ const p=["x9","Z!","mQ"]; return p.join(""); })();
-
-function _x(s,k){
-  let o="";
-  for(let i=0;i<s.length;i++) o+=String.fromCharCode(s.charCodeAt(i)^k.charCodeAt(i%k.length));
-  return o;
-}
-function _d(s){ return _x(atob(s),_k); }
-
-// ── STAGE DATA — no plain-text answers or clues anywhere ──
-// All values are pre-encrypted; raw answers DO NOT appear in this file.
-const _S=[
-  {qRaw:"54 68 61 69 6C 61 6E 64",          _a:"LFE7SAEwFl0=",            _c:"SAlrEF1gSAh6EV1gSQlrEVw="},
-  {qRaw:"Q2hhdEdQVA==",                      _a:"O1E7VSoBLA==",            _c:"SAlrEFxhSAl6EV1gSQlrEV0="},
-  {qRaw:"01000111 01001001 01000110 01010100 01000101 01000100 00100000 01000011 01001111 01001101 01010000 01010101 01010100 01000101 01010010",
-                                              _a:"P3AcdSgVWHoVbD0ELHwI",    _c:"SAhqEV1gSQl6EVxgSAlqEF0="},
-  {qRaw:"FRPSXWHU",                          _a:"O3YXcTgFPWs=",            _c:"SAhrEVxhSAh6EVxhSQhqEFw="}
+// ── QUESTIONS (no answers here — only display text) ──
+const _Q = [
+  { qRaw: "54 68 61 69 6C 61 6E 64" },
+  { qRaw: "Q2hhdEdQVA==" },
+  { qRaw: "01000111 01001001 01000110 01010100 01000101 01000100 00100000 01000011 01001111 01001101 01010000 01010101 01010100 01000101 01010010" },
+  { qRaw: "FRPSXWHU" }
 ];
 
-let current=0, unlocked=[], currentCode="";
-let _busy=false; // global lock — prevents any function running twice at once
-let _savedTrollHTML=""; // save troll stage HTML across block/unblock
-
-function _lock(fn){
-  return function(){
-    if(_busy) return;
-    _busy=true;
-    try{ fn.apply(this,arguments); }
-    catch(e){ _busy=false; throw e; } // release lock on unexpected error
-  };
-}
-function _release(){ _busy=false; }
+let current = 0;
+let unlocked = []; // stores clue texts returned from the server
+let currentCode = "";
+let _busy = false;
+let _savedTrollHTML = "";
 
 function renderQuestion(){
-  if(current>=_S.length){
-    document.getElementById("question").innerText="ภารกิจเสร็จสิ้น";
-    document.getElementById("answer").style.display="none";
+  if(current >= _Q.length){
+    document.getElementById("question").innerText = "ภารกิจเสร็จสิ้น";
+    document.getElementById("answer").style.display = "none";
     return;
   }
-  document.getElementById("question").innerText="ข้อ "+(current+1)+": "+_S[current].qRaw;
+  document.getElementById("question").innerText = "ข้อ "+(current+1)+": "+_Q[current].qRaw;
 }
+
 function updateClues(){
-  const container=document.getElementById("clues");
-  container.innerHTML="";
-  for(let i=0;i<_S.length;i++){
-    const div=document.createElement("div");
+  const container = document.getElementById("clues");
+  container.innerHTML = "";
+  for(let i = 0; i < _Q.length; i++){
+    const div = document.createElement("div");
     if(unlocked[i]){
-      const text=_d(unlocked[i]);
-      div.className="clue-item";
-      div.innerHTML=`<div class="clue-header"><span class="clue-label">ส่วนที่ ${i+1}</span><button class="copy-btn" onclick="copyClue(${i})" title="คัดลอก">📋 คัดลอก</button></div><div class="clue-text" id="clue-text-${i}"></div>`;
-      div.querySelector(`#clue-text-${i}`).textContent=text;
+      div.className = "clue-item";
+      div.innerHTML = `<div class="clue-header"><span class="clue-label">ส่วนที่ ${i+1}</span><button class="copy-btn" onclick="copyClue(${i})" title="คัดลอก">📋 คัดลอก</button></div><div class="clue-text" id="clue-text-${i}"></div>`;
+      div.querySelector(`#clue-text-${i}`).textContent = unlocked[i];
     } else {
-      div.className="clue-item locked";
-      div.innerHTML=`<div class="clue-label">ส่วนที่ ${i+1} : [ล็อก]</div>`;
+      div.className = "clue-item locked";
+      div.innerHTML = `<div class="clue-label">ส่วนที่ ${i+1} : [ล็อก]</div>`;
     }
     container.appendChild(div);
   }
@@ -365,84 +179,89 @@ function updateClues(){
 
 function copyClue(i){
   if(!unlocked[i]) return;
-  const text=_d(unlocked[i]);
-  _copyText(text, document.querySelectorAll('#clues .copy-btn')[i]);
+  _copyText(unlocked[i], document.querySelectorAll('#clues .copy-btn')[i]);
 }
-
 function copyQuestion(){
-  const el=document.getElementById("question");
+  const el = document.getElementById("question");
   if(!el||!el.textContent) return;
   _copyText(el.textContent, document.getElementById("copyQuestionBtn"));
 }
-
 function _copyText(text, btn){
   function flash(){
-    if(btn){
-      btn.classList.add("copied");
-      btn.textContent="✓ คัดลอกแล้ว";
-      setTimeout(()=>{ btn.classList.remove("copied"); btn.innerHTML="📋 คัดลอก"; },1500);
-    }
+    if(btn){ btn.classList.add("copied"); btn.textContent="✓ คัดลอกแล้ว"; setTimeout(()=>{ btn.classList.remove("copied"); btn.innerHTML="📋 คัดลอก"; },1500); }
   }
-  // navigator.clipboard bypasses the document 'copy' event block
   if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(flash).catch(()=>{
-      _copyFallback(text); flash();
-    });
-  } else {
-    _copyFallback(text); flash();
-  }
+    navigator.clipboard.writeText(text).then(flash).catch(()=>{ _copyFallback(text); flash(); });
+  } else { _copyFallback(text); flash(); }
 }
-
 function _copyFallback(text){
-  const ta=document.createElement("textarea");
-  ta.value=text;
-  ta.style.cssText="position:fixed;opacity:0;top:0;left:0;";
-  document.body.appendChild(ta);
-  ta.focus(); ta.select();
-  try{ document.execCommand("copy"); } catch(e){}
-  document.body.removeChild(ta);
+  const ta=document.createElement("textarea"); ta.value=text; ta.style.cssText="position:fixed;opacity:0;top:0;left:0;"; document.body.appendChild(ta); ta.focus(); ta.select(); try{ document.execCommand("copy"); }catch(e){} document.body.removeChild(ta);
 }
 function normalize(s){ return s.trim().toLowerCase(); }
+function setAnswerBtn(disabled){ const btn=document.querySelector('.card button'); if(btn) btn.disabled=disabled; }
 
-// ── disable/enable the main answer button ──
-function setAnswerBtn(disabled){
-  const btn=document.querySelector('.card button');
-  if(btn) btn.disabled=disabled;
+// ── CHECK ANSWER via API ──
+async function checkAnswer(){
+  if(_busy) return;
+  const userAnswer = normalize(document.getElementById("answer").value);
+  if(!userAnswer) return;
+
+  _busy = true;
+  setAnswerBtn(true);
+  document.getElementById("status").innerHTML = "<span style='color:#8b949e'>กำลังตรวจสอบ...</span>";
+
+  try {
+    const res = await fetch(API_URL + "/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stage: current, answer: userAnswer })
+    });
+    const data = await res.json();
+
+    if(data.correct){
+      // Server returns the clue only when the answer is right
+      unlocked[current] = data.clue;
+      startTrollStage();
+    } else {
+      document.getElementById("status").innerHTML = "<span class='error'>คำตอบไม่ถูกต้อง</span>";
+      setAnswerBtn(false);
+      _busy = false;
+    }
+  } catch(e) {
+    document.getElementById("status").innerHTML = "<span class='error'>เชื่อมต่อ API ไม่ได้ ลองใหม่</span>";
+    setAnswerBtn(false);
+    _busy = false;
+  }
 }
 
-function checkAnswer(){
-  if(_busy) return;
-  const user=normalize(document.getElementById("answer").value);
-  const correct=normalize(_d(_S[current]._a));
-  if(user===correct){
-    _busy=true;
-    setAnswerBtn(true);
-    startTrollStage();
-  } else {
-    document.getElementById("status").innerHTML="<span class='error'>คำตอบไม่ถูกต้อง</span>";
-  }
+// ── HINT via API ──
+async function fetchHint(){
+  try {
+    const res = await fetch(API_URL + "/hint", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stage: current })
+    });
+    const data = await res.json();
+    return data.hint || "?";
+  } catch(e) { return "เชื่อมต่อไม่ได้"; }
 }
 
 function unlockStage(){
-  unlocked[current]=_S[current]._c;
   current++;
   updateClues(); renderQuestion();
-  document.getElementById("answer").value="";
-  document.getElementById("status").innerHTML="<span class='success'>ปลดล็อกสำเร็จ</span>";
-  document.getElementById("trollArea").innerHTML="";
-  _savedTrollHTML="";
+  document.getElementById("answer").value = "";
+  document.getElementById("status").innerHTML = "<span class='success'>ปลดล็อกสำเร็จ</span>";
+  document.getElementById("trollArea").innerHTML = "";
+  _savedTrollHTML = "";
   resetHint();
   setAnswerBtn(false);
-  _busy=false;
+  _busy = false;
 }
 
 function scrollToTroll(){
-  setTimeout(()=>{
-    const el=document.getElementById("trollArea");
-    if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
-  },120);
+  setTimeout(()=>{ const el=document.getElementById("trollArea"); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); },120);
 }
-
 function startTrollStage(){
   const m=current%5;
   if(m===0)fakeAd();
@@ -452,140 +271,65 @@ function startTrollStage(){
   else codeGate();
   scrollToTroll();
 }
-
 function fakeAd(){
   let sec=60, done=false;
   document.getElementById("trollArea").innerHTML=`<div class="card"><h3>📺 โปรดรอสักครู่...</h3><p id="count">${sec}</p></div>`;
-  let t=setInterval(()=>{
-    sec--;
-    document.getElementById("count").innerText=sec;
-    if(sec<=0 && !done){ done=true; clearInterval(t); unlockStage(); }
-  },1000);
+  let t=setInterval(()=>{ sec--; document.getElementById("count").innerText=sec; if(sec<=0&&!done){ done=true; clearInterval(t); unlockStage(); } },1000);
 }
-
 function fakeAI(){
   generateCode();
   document.getElementById("trollArea").innerHTML=`<div class="card"><h3>🤖 AI VERIFICATION</h3><p>พิมพ์รหัสนี้:</p><h2 style="color:#ffcc00">${currentCode}</h2><input id="humanInput" placeholder="15 ตัวอักษร"><button onclick="verifyHuman()">ยืนยัน</button></div>`;
 }
-function verifyHuman(){
-  if(document.getElementById("humanInput").value.trim()===currentCode) unlockStage();
-  else alert("❌ AI DETECTED");
-}
-
+function verifyHuman(){ if(document.getElementById("humanInput").value.trim()===currentCode) unlockStage(); else alert("❌ AI DETECTED"); }
 function runawayButton(){
-  document.getElementById("trollArea").innerHTML=`
-    <div class="card" id="runawayCard" style="min-height:200px;position:relative;">
-      <h3>🎯 จับปุ่มให้ได้</h3>
-      <button id="runaway" style="position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);">กดฉัน</button>
-    </div>`;
-  const btn=document.getElementById("runaway");
-  const card=document.getElementById("runawayCard");
-  let caught=false;
-
-  function moveBtn(){
-    if(caught) return;
-    const cw=card.offsetWidth, ch=card.offsetHeight;
-    const bw=btn.offsetWidth+8, bh=btn.offsetHeight+8;
-    const padTop=52;
-    const maxX=Math.max(0,cw-bw);
-    const maxY=Math.max(0,ch-bh-padTop);
-    btn.style.left=Math.floor(Math.random()*maxX)+"px";
-    btn.style.top=Math.floor(padTop+Math.random()*maxY)+"px";
-    btn.style.transform="none";
-  }
-
-  btn.addEventListener("mouseenter", moveBtn);
-
-  btn.addEventListener("touchstart", e=>{
-    e.preventDefault();
-    moveBtn();
-  }, {passive:false});
-
+  document.getElementById("trollArea").innerHTML=`<div class="card" id="runawayCard" style="min-height:200px;position:relative;"><h3>🎯 จับปุ่มให้ได้</h3><button id="runaway" style="position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);">กดฉัน</button></div>`;
+  const btn=document.getElementById("runaway"); const card=document.getElementById("runawayCard"); let caught=false;
+  function moveBtn(){ if(caught) return; const cw=card.offsetWidth,ch=card.offsetHeight,bw=btn.offsetWidth+8,bh=btn.offsetHeight+8,padTop=52,maxX=Math.max(0,cw-bw),maxY=Math.max(0,ch-bh-padTop); btn.style.left=Math.floor(Math.random()*maxX)+"px"; btn.style.top=Math.floor(padTop+Math.random()*maxY)+"px"; btn.style.transform="none"; }
+  btn.addEventListener("mouseenter",moveBtn);
+  btn.addEventListener("touchstart",e=>{ e.preventDefault(); moveBtn(); },{passive:false});
   btn.onclick=()=>{ if(caught) return; caught=true; btn.disabled=true; unlockStage(); };
 }
-
 function fakeLoading(){
   document.getElementById("trollArea").innerHTML=`<div class="card"><h3>⏳ Processing...</h3><progress id="bar" value="0" max="100"></progress></div>`;
-  let p=0, done=false;
-  let t=setInterval(()=>{
-    p+=Math.random();
-    document.getElementById("bar").value=p;
-    if(p>=100 && !done){ done=true; clearInterval(t); unlockStage(); }
-  },200);
+  let p=0,done=false; let t=setInterval(()=>{ p+=Math.random(); document.getElementById("bar").value=p; if(p>=100&&!done){ done=true; clearInterval(t); unlockStage(); } },200);
 }
-
-function generateCode(){
-  const chars="1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzกขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ";
-  let c=""; for(let i=0;i<15;i++) c+=chars[Math.floor(Math.random()*chars.length)];
-  currentCode=c;
-}
-
-function codeGate(){
-  generateCode();
-  document.getElementById("trollArea").innerHTML=`<div class="card"><h3>🔐 VERIFY CODE</h3><p>พิมพ์รหัสให้ตรง:</p><h2 style="color:#ffcc00">${currentCode}</h2><input id="codeInput"><button onclick="checkCode()">ยืนยัน</button></div>`;
-}
-function checkCode(){
-  if(document.getElementById("codeInput").value.trim()===currentCode) unlockStage();
-  else alert("❌ WRONG CODE");
-}
+function generateCode(){ const chars="1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzกขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"; let c=""; for(let i=0;i<15;i++) c+=chars[Math.floor(Math.random()*chars.length)]; currentCode=c; }
+function codeGate(){ generateCode(); document.getElementById("trollArea").innerHTML=`<div class="card"><h3>🔐 VERIFY CODE</h3><p>พิมพ์รหัสให้ตรง:</p><h2 style="color:#ffcc00">${currentCode}</h2><input id="codeInput"><button onclick="checkCode()">ยืนยัน</button></div>`; }
+function checkCode(){ if(document.getElementById("codeInput").value.trim()===currentCode) unlockStage(); else alert("❌ WRONG CODE"); }
 
 // ── HINT SYSTEM ──
 let _hintClicks = 0;
 const HINT_TARGET = 300;
 
-function getHintText(idx){
-  const answer = _d(_S[idx]._a);
-  if(idx === 0){
-    // HEX — spaced uppercase hex bytes
-    return answer.split('').map(c => c.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0')).join(' ');
-  } else if(idx === 1){
-    // BASE64
-    return btoa(answer);
-  } else if(idx === 2){
-    // BINARY — spaced 8-bit bytes
-    return answer.split('').map(c => c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
-  } else if(idx === 3){
-    // Caesar ROT13
-    return answer.replace(/[a-zA-Z]/g, c => {
-      const base = c <= 'Z' ? 65 : 97;
-      return String.fromCharCode((c.charCodeAt(0) - base + 13) % 26 + base);
-    });
-  }
-  return answer;
-}
-
-function hintClick(){
+async function hintClick(){
   _hintClicks++;
   const pct = Math.min((_hintClicks / HINT_TARGET) * 100, 100);
   const bar = document.getElementById("hintBar");
   const btn = document.getElementById("hintBtn");
   const box = document.getElementById("hintBox");
   const isAlmost = _hintClicks >= 210;
-
   bar.style.width = pct + "%";
-
   if(_hintClicks >= HINT_TARGET){
     bar.className = "hint-progress-bar ready";
     btn.className = "hint-btn ready";
-    btn.innerHTML = "💡 คำใบ้ปลดล็อกแล้ว!";
+    btn.innerHTML = "💡 กำลังโหลดคำใบ้...";
+    const hintText = await fetchHint();
     const labels = ["HEX","BASE64","BINARY","CAESAR (ROT13)"];
     box.style.display = "block";
-    box.innerHTML = `<span style="color:#8b949e;font-size:0.78rem;display:block;margin-bottom:4px;">${labels[current]}</span>${getHintText(current)}`;
+    box.innerHTML = `<span style="color:#8b949e;font-size:0.78rem;display:block;margin-bottom:4px;">${labels[current]}</span>${hintText}`;
+    btn.innerHTML = "💡 คำใบ้ปลดล็อกแล้ว!";
   } else {
     bar.className = "hint-progress-bar" + (isAlmost ? " almost" : "");
     btn.className = "hint-btn" + (isAlmost ? " almost" : "");
     btn.innerHTML = `💡 คลิก 300 ครั้งเพื่อดูคำใบ้ <span id="hintCount">(${_hintClicks}/300)</span>`;
   }
 }
-
 function resetHint(){
   _hintClicks = 0;
-  const bar = document.getElementById("hintBar");
-  const btn = document.getElementById("hintBtn");
-  const box = document.getElementById("hintBox");
-  if(bar){ bar.style.width = "0%"; bar.className = "hint-progress-bar"; }
-  if(btn){ btn.className = "hint-btn"; btn.innerHTML = `💡 คลิก 300 ครั้งเพื่อดูคำใบ้ <span id="hintCount">(0/300)</span>`; }
-  if(box){ box.style.display = "none"; box.textContent = ""; }
+  const bar=document.getElementById("hintBar"); const btn=document.getElementById("hintBtn"); const box=document.getElementById("hintBox");
+  if(bar){ bar.style.width="0%"; bar.className="hint-progress-bar"; }
+  if(btn){ btn.className="hint-btn"; btn.innerHTML=`💡 คลิก 300 ครั้งเพื่อดูคำใบ้ <span id="hintCount">(0/300)</span>`; }
+  if(box){ box.style.display="none"; box.textContent=""; }
 }
 
 renderQuestion(); updateClues();
