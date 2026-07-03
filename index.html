@@ -1,40 +1,68 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ไม่บอก</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Temporarily Unavailable</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            max-width: 500px;
+            width: 100%;
+        }
+        .icon {
+            font-size: 64px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        p {
+            font-size: 16px;
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
 
-<div id="devBlockOverlay">
-  <h1>🚫 ห้ามเข้า</h1>
-  <p>ตรวจพบการเปิด Developer Tools<br>กรุณาปิด DevTools แล้วรีเฟรชหน้า</p>
+<div class="container">
+    <div class="icon">🛠️</div>
+    <h1>We&rsquo;ll Be Right Back</h1>
+    <p>The website is currently undergoing scheduled maintenance or technical updates. We apologize for the inconvenience and should be back online shortly.</p>
+    <div class="spinner"></div>
 </div>
 
-<h1>🔒</h1>
-<div class="card">
-  <div class="question-row">
-    <h2 id="question"></h2>
-    <button class="copy-btn" id="copyQuestionBtn" onclick="copyQuestion()" title="คัดลอกโจทย์">📋 คัดลอก</button>
-  </div>
-  <input id="answer" autocomplete="off" placeholder="No ai plz '^' ">
-  <button onclick="checkAnswer()">ตอบ</button>
-  <p id="status"></p>
-  <div>
-    <button class="hint-btn" id="hintBtn" onclick="hintClick()">💡 คลิก 300 ครั้งเพื่อดูคำใบ้ <span id="hintCount">(0/300)</span></button>
-    <div class="hint-progress-wrap"><div class="hint-progress-bar" id="hintBar"></div></div>
-    <div class="hint-box" id="hintBox"></div>
-  </div>
-</div>
-<div class="card">
-  <h3>ชิ้นส่วนที่ปลดล็อกแล้ว</h3>
-  <div id="clues"></div>
-  <h5>Hint:🌐 🔄 + haha</h5>
-</div>
-<div id="trollArea"></div>
-
-<script src="script.js"></script>
 </body>
 </html>
