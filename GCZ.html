@@ -1,43 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WJWNBAJKODFHIABNFIHIUWABIKJMWOI)HIWNDOJAOIDHNIOMWDPJIOFNAWPKLFMAOPWFHNIOWANFOPANWVJKON</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f1f3f4;
-            margin: 0;
-        }
-        .download-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #ffffff;
-            background-color: #1a73e8; /* Google Blue */
-            text-decoration: none;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            transition: background-color 0.2s;
-        }
-        .download-btn:hover {
-            background-color: #1557b0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Download</title>
+<style>
+body{
+    font-family:Arial,sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+    background:#f1f3f4;
+}
+button{
+    padding:12px 24px;
+    background:#1a73e8;
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+}
+button:hover{
+    background:#1557b0;
+}
+</style>
 </head>
 <body>
 
-    <a href="https://docs.google.com/uc?export=download&id=1fMfAvRIJwxuQTFTQ_el-G3FVne9iUS9a" 
-       class="download-btn" 
-       download>
-       Download ZIP from Google Drive
-    </a>
+<button id="download">Download</button>
+
+<script>
+const p1 = "https://docs.google.com/";
+const p2 = "uc?export=download&id=";
+const id = "195wbg5oddX7UBHJ1zGZmEeTVFRwv2WwI";
+
+document.getElementById("download").onclick = () => {
+    location.href = p1 + p2 + id;
+};
+</script>
 
 </body>
 </html>
