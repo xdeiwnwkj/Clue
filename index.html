@@ -1,68 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site Temporarily Unavailable</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            text-align: center;
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            max-width: 500px;
-            width: 100%;
-        }
-        .icon {
-            font-size: 64px;
-            color: #e74c3c;
-            margin-bottom: 20px;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-        p {
-            font-size: 16px;
-            color: #7f8c8d;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download from Google Drive</title>
 </head>
 <body>
 
-<div class="container">
-    <div class="icon">🛠️</div>
-    <h1>We&rsquo;ll Be Right Back</h1>
-    <p>The website is currently undergoing scheduled maintenance or technical updates. We apologize for the inconvenience and should be back online shortly.</p>
-    <div class="spinner"></div>
-</div>
+  <h2>Download File</h2>
+
+  <a
+    href="https://drive.google.com/uc?export=download&id=YOUR_FILE_ID"
+    download
+  >
+    <button>Download File</button>
+  </a>
 
 </body>
 </html>
