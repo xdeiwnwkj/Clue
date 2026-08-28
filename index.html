@@ -1,20 +1,175 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Download from Google Drive</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบยืม–คืนหนังสือห้องสมุด</title>
+
+<!-- ฟอนต์ภาษาไทย -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Sarabun:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h2>Download File</h2>
+<!-- แถบสถานะการเชื่อมต่อฐานข้อมูล -->
+<div class="conn-bar" id="connBar">
+  <span class="conn-dot" id="connDot"></span>
+  <span id="connText">กำลังเชื่อมต่อฐานข้อมูล…</span>
+</div>
 
-  <a
-    href="https://drive.google.com/file/d/1hn_zAvgupxCMLcr_FLlklWLHFzLGWt0c/view?usp=sharing"
-    download
-  >
-    <button>Download File</button>
-  </a>
+<!-- ================= HEADER : ตั๋วห้องสมุด ================= -->
+<header class="ticket-header">
+  <div class="ticket-header__inner">
+    <div class="ticket-header__mark">📖</div>
+    <div class="ticket-header__text">
+      <p class="eyebrow">ห้องสมุดโรงเรียน · Library Circulation Desk</p>
+      <h1>ระบบยืม–คืนหนังสือ</h1>
+      <p class="subtitle">กรอกชื่อ หยิบเล่มที่ใช่ แล้วให้ระบบประทับตราวันครบกำหนดให้อัตโนมัติ</p>
+    </div>
+  </div>
 
+  <div class="stub-row" id="statsRow">
+    <div class="stub">
+      <span class="stub__num" id="statTotal">–</span>
+      <span class="stub__label">หนังสือทั้งหมด</span>
+    </div>
+    <div class="stub stub--green">
+      <span class="stub__num" id="statAvailable">–</span>
+      <span class="stub__label">พร้อมให้ยืม</span>
+    </div>
+    <div class="stub stub--red">
+      <span class="stub__num" id="statBorrowed">–</span>
+      <span class="stub__label">ถูกยืมอยู่</span>
+    </div>
+  </div>
+</header>
+
+<div class="dna-strip" aria-hidden="true">
+  <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<main class="wrap">
+
+  <!-- ================= แถบค้นหา / เพิ่มหนังสือ ================= -->
+  <section class="toolbar">
+    <div class="drawer-label">
+      <input type="text" id="searchInput" placeholder="ค้นหาชื่อหนังสือ ผู้แต่ง หรือหมวดหมู่…" autocomplete="off">
+    </div>
+    <select id="categoryFilter">
+      <option value="">ทุกหมวดหมู่</option>
+    </select>
+    <button class="btn btn--ghost" id="addBookBtn">+ เพิ่มหนังสือใหม่</button>
+  </section>
+
+  <!-- ================= แท็บ ================= -->
+  <nav class="tabs">
+    <button class="tab is-active" data-tab="books">รายการหนังสือ</button>
+    <button class="tab" data-tab="history">ประวัติการยืม–คืน</button>
+  </nav>
+
+  <!-- ================= แท็บหนังสือ ================= -->
+  <section id="tab-books" class="tab-panel is-active">
+    <div class="card-grid" id="bookGrid">
+      <!-- การ์ดหนังสือถูกสร้างด้วย JavaScript -->
+    </div>
+    <p class="empty-state" id="bookEmpty" hidden>ไม่พบหนังสือที่ตรงกับคำค้นหา ลองคำอื่นดูนะ</p>
+  </section>
+
+  <!-- ================= แท็บประวัติ ================= -->
+  <section id="tab-history" class="tab-panel">
+    <div class="history-table-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>รายการ</th>
+            <th>หนังสือ</th>
+            <th>ผู้ยืม</th>
+            <th>ห้อง/ชั้น</th>
+            <th>วันที่</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+      <p class="empty-state" id="historyEmpty" hidden>ยังไม่มีประวัติการยืม–คืน</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>ระบบยืม–คืนหนังสือ · HTML · CSS · JavaScript · เชื่อมต่อฐานข้อมูลด้วย Supabase</p>
+</footer>
+
+<!-- ================= MODAL: ยืมหนังสือ ================= -->
+<div class="modal-backdrop" id="borrowModal">
+  <div class="modal card-stamp">
+    <button class="modal__close" data-close-modal>✕</button>
+    <p class="eyebrow">บัตรยืมหนังสือ</p>
+    <h2 id="borrowModalTitle">ยืมหนังสือ</h2>
+    <form id="borrowForm">
+      <label>
+        ชื่อ–นามสกุลผู้ยืม
+        <input type="text" id="borrowerName" required placeholder="เช่น ด.ช. สมชาย ใจดี">
+      </label>
+      <label>
+        ห้อง/ชั้นเรียน
+        <input type="text" id="borrowerClass" required placeholder="เช่น ม.2/3">
+      </label>
+      <label>
+        กำหนดคืน (ค่าเริ่มต้น 7 วัน)
+        <input type="date" id="dueDate" required>
+      </label>
+      <button type="submit" class="btn btn--primary btn--block">ประทับตรายืม</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= MODAL: เพิ่มหนังสือ ================= -->
+<div class="modal-backdrop" id="addBookModal">
+  <div class="modal card-stamp">
+    <button class="modal__close" data-close-modal>✕</button>
+    <p class="eyebrow">รายการใหม่ในแคตตาล็อก</p>
+    <h2>เพิ่มหนังสือ</h2>
+    <form id="addBookForm">
+      <label>
+        ชื่อหนังสือ
+        <input type="text" id="newTitle" required placeholder="เช่น เจ้าชายน้อย">
+      </label>
+      <label>
+        ผู้แต่ง
+        <input type="text" id="newAuthor" required placeholder="เช่น อ็องตวน เดอ แซ็งเตกซูว์เปรี">
+      </label>
+      <label>
+        หมวดหมู่
+        <input type="text" id="newCategory" required placeholder="เช่น วรรณกรรม, คอมพิวเตอร์, วิทยาศาสตร์">
+      </label>
+      <button type="submit" class="btn btn--primary btn--block">เพิ่มเข้าแคตตาล็อก</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= MODAL: ยืนยันการลบหนังสือ ================= -->
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal card-stamp">
+    <button class="modal__close" data-close-modal>✕</button>
+    <p class="eyebrow">ยืนยันการลบ</p>
+    <h2>ลบหนังสือเล่มนี้?</h2>
+    <p class="modal__desc" id="deleteModalDesc">การลบจะเอาหนังสือออกจากแคตตาล็อกถาวร แต่ประวัติการยืม–คืนเดิมจะยังอยู่</p>
+    <div class="modal__btn-row">
+      <button type="button" class="btn btn--ghost btn--block" data-close-modal>ยกเลิก</button>
+      <button type="button" class="btn btn--danger btn--block" id="confirmDeleteBtn">ลบหนังสือ</button>
+    </div>
+  </div>
+</div>
+
+<!-- toast แจ้งเตือน -->
+<div class="toast" id="toast"></div>
+
+<!-- Supabase client library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,515 @@
+/* =========================================================
+   ระบบยืม–คืนหนังสือห้องสมุด
+   แนวคิดดีไซน์: "Retro ยุค 70s — ตั๋วห้องสมุดสไตล์วินเทจ"
+   ได้แรงบันดาลใจจาก: ป้ายร้านยุค 70s, ตราปั๊มยาง, ขอบตั๋วหยัก,
+   ผ้าใบลายทางหน้าร้าน, กระดาษสีครีมเก่า
+   โทนสีอบอุ่น: ครีม / ส้มอิฐ / มัสตาร์ด / เขียวอโวคาโด / น้ำตาลเข้ม
+   ========================================================= */
+
+:root{
+  /* --- โทนสี (retro 70s palette) --- */
+  --cream:      #F4E9CE;   /* กระดาษวินเทจ */
+  --cream-dark: #E9D8AC;
+  --brown:      #4A3626;   /* หมึกน้ำตาลเข้ม */
+  --brown-soft: #806E56;
+  --rust:       #C4552E;   /* ส้มอิฐ: สี "ถูกยืม" / โทนหลัก */
+  --rust-bg:    #F3DCC8;
+  --mustard:    #E3A63D;   /* มัสตาร์ด: จุดเน้น */
+  --mustard-bg: #F8E8C2;
+  --avocado:    #74803F;   /* เขียวอโวคาโด: สี "ว่าง" */
+  --avocado-bg: #E6E8D0;
+  --cream-white:#FBF6E8;
+
+  --font-display: 'Chonburi', serif;
+  --font-body: 'Sarabun', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 18px;
+  --radius-lg: 26px;
+  --border: 2.5px;
+  --shadow-warm: 4px 4px 0 0 var(--brown);
+  --shadow-warm-sm: 2.5px 2.5px 0 0 var(--brown);
+}
+
+*{ box-sizing:border-box; }
+
+html,body{
+  margin:0;
+  padding:0;
+  background:var(--cream);
+  color:var(--brown);
+  font-family:var(--font-body);
+  line-height:1.6;
+}
+
+h1,h2{
+  font-family:var(--font-display);
+  color:var(--brown);
+  margin:0;
+  font-weight:400;
+  letter-spacing:.01em;
+}
+
+/* จุดกระดาษละเอียดแบบสิ่งพิมพ์เก่า (halftone) */
+body::before{
+  content:"";
+  position:fixed; inset:0;
+  background-image: radial-gradient(circle, rgba(74,54,38,.05) 1px, transparent 1.3px);
+  background-size: 7px 7px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ---------- แถบสถานะการเชื่อมต่อ ---------- */
+.conn-bar{
+  position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; gap:9px;
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  letter-spacing:.02em;
+  background:var(--brown);
+  color:var(--cream);
+  padding:7px 16px;
+}
+.conn-dot{
+  width:9px; height:9px; border-radius:50%;
+  background:#9A8C74;
+  transition: background .3s;
+}
+.conn-dot.is-ok{ background:var(--avocado); }
+.conn-dot.is-error{ background:var(--rust); }
+
+/* ---------- HEADER: ป้ายร้านยุค 70s พร้อมแสงระเบิดแบบวินเทจ ---------- */
+.ticket-header{
+  position:relative;
+  background:var(--rust);
+  color:var(--cream-white);
+  padding:42px 24px 40px;
+  overflow:hidden;
+}
+/* แสงระเบิด (sunburst) ลอยอยู่หลังตราสัญลักษณ์ */
+.ticket-header::before{
+  content:"";
+  position:absolute;
+  top:-140px; left:-60px;
+  width:420px; height:420px;
+  background:repeating-conic-gradient(
+    var(--mustard) 0deg 10deg,
+    transparent 10deg 20deg
+  );
+  opacity:.22;
+  border-radius:50%;
+  z-index:0;
+}
+/* ขอบหยักด้านล่างแบบตั๋วโบราณ (scalloped ticket edge) */
+.ticket-header::after{
+  content:"";
+  position:absolute; left:0; right:0; bottom:-1px; height:22px;
+  background-image: radial-gradient(circle, var(--cream) 0 11px, transparent 11.5px);
+  background-size: 30px 30px;
+  background-position: -4px 12px;
+  z-index:1;
+}
+.ticket-header__inner{
+  position:relative; z-index:2;
+  max-width:1080px; margin:0 auto;
+  display:flex; align-items:center; gap:22px;
+}
+.ticket-header__mark{
+  font-size:2.2rem;
+  background:var(--cream-white);
+  border:var(--border) solid var(--brown);
+  outline:2.5px dashed var(--mustard);
+  outline-offset:-8px;
+  border-radius:50%;
+  width:82px; height:82px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+  transform:rotate(-6deg);
+  box-shadow:var(--shadow-warm-sm);
+}
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--mustard);
+  margin:0 0 8px;
+  font-weight:700;
+}
+.ticket-header h1{
+  color:var(--cream-white);
+  font-size:clamp(1.7rem, 3.4vw, 2.5rem);
+}
+.subtitle{
+  margin:10px 0 0;
+  color:#F6E4CE;
+  font-size:.95rem;
+  max-width:56ch;
+}
+
+/* ---------- Groovy awning stripe: ลายเซ็นของระบบ ---------- */
+.dna-strip{
+  position:relative; z-index:1;
+  height:16px;
+  background: repeating-linear-gradient(
+    120deg,
+    var(--rust) 0 26px,
+    var(--mustard) 26px 52px,
+    var(--avocado) 52px 78px,
+    var(--cream-white) 78px 104px
+  );
+  border-bottom:var(--border) solid var(--brown);
+}
+.dna-strip span{ display:none; }
+
+.stub-row{
+  position:relative; z-index:2;
+  max-width:1080px; margin:26px auto 0;
+  display:flex; gap:14px; flex-wrap:wrap;
+}
+.stub{
+  flex:1 1 140px;
+  background:var(--cream-white);
+  color:var(--brown);
+  border:var(--border) solid var(--brown);
+  border-radius:var(--radius);
+  padding:13px 16px;
+  display:flex; flex-direction:column; gap:2px;
+  box-shadow:var(--shadow-warm-sm);
+}
+.stub__num{ font-family:var(--font-mono); font-size:1.55rem; font-weight:700; color:var(--brown); }
+.stub__label{
+  font-size:.73rem;
+  font-family:var(--font-mono);
+  letter-spacing:.02em;
+  color:var(--brown-soft);
+}
+.stub--green{ background:var(--avocado); border-color:var(--brown); }
+.stub--green .stub__num, .stub--green .stub__label{ color:var(--cream-white); }
+.stub--red{ background:var(--rust); border-color:var(--brown); }
+.stub--red .stub__num, .stub--red .stub__label{ color:var(--cream-white); }
+
+/* ---------- MAIN WRAP ---------- */
+.wrap{
+  max-width:1080px;
+  margin:0 auto;
+  padding:32px 24px 60px;
+  position:relative;
+  z-index:1;
+}
+
+/* ---------- Toolbar ---------- */
+.toolbar{
+  display:flex; gap:14px; flex-wrap:wrap;
+  margin-bottom:20px;
+}
+.drawer-label{
+  flex:2 1 260px;
+  background:var(--cream-white);
+  border:var(--border) solid var(--brown);
+  border-radius:var(--radius-lg);
+  position:relative;
+}
+.drawer-label::before{
+  content:"ค้นหา";
+  position:absolute; top:-12px; left:16px;
+  background:var(--mustard);
+  border:2px solid var(--brown);
+  border-radius:999px;
+  padding:1px 10px;
+  font-family:var(--font-mono);
+  font-size:.66rem;
+  font-weight:700;
+  color:var(--brown);
+  letter-spacing:.04em;
+}
+.drawer-label input{
+  width:100%; border:none; background:transparent;
+  padding:14px 18px; font-family:var(--font-body); font-size:.95rem; color:var(--brown);
+  border-radius:var(--radius-lg);
+}
+.drawer-label input:focus{ outline:2px solid var(--rust); outline-offset:-2px; }
+
+select#categoryFilter{
+  flex:1 1 160px;
+  border:var(--border) solid var(--brown);
+  border-radius:var(--radius-lg);
+  background:var(--cream-white);
+  padding:0 14px;
+  font-family:var(--font-body);
+  font-size:.9rem;
+  color:var(--brown);
+}
+
+.btn{
+  font-family:var(--font-body);
+  font-weight:700;
+  font-size:.9rem;
+  border-radius:999px;
+  padding:13px 22px;
+  border:var(--border) solid var(--brown);
+  cursor:pointer;
+  box-shadow:var(--shadow-warm-sm);
+  transition: transform .12s ease, box-shadow .12s ease, background .15s ease;
+}
+.btn:active{
+  transform:translate(2px,2px);
+  box-shadow:0 0 0 0 var(--brown);
+}
+.btn--ghost{ background:var(--cream-white); color:var(--brown); }
+.btn--ghost:hover{ background:var(--mustard-bg); }
+.btn--primary{ background:var(--avocado); color:var(--cream-white); }
+.btn--primary:hover{ background:#5f6934; }
+.btn--danger{ background:var(--rust); color:var(--cream-white); }
+.btn--danger:hover{ background:#a1451f; }
+.btn--block{ width:100%; }
+.btn--sm{ padding:9px 16px; font-size:.82rem; box-shadow:var(--shadow-warm-sm); }
+.btn:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visible{
+  outline:2px solid var(--rust); outline-offset:2px;
+}
+
+/* ---------- Tabs ---------- */
+.tabs{
+  display:flex; gap:6px; margin-bottom:20px;
+  border-bottom:var(--border) solid var(--brown);
+}
+.tab{
+  font-family:var(--font-display);
+  font-weight:400;
+  font-size:.95rem;
+  background:transparent; border:none;
+  padding:11px 20px;
+  color:var(--brown-soft);
+  cursor:pointer;
+  position:relative; top:2px;
+  border-radius:var(--radius) var(--radius) 0 0;
+}
+.tab:hover{ color:var(--brown); background:var(--mustard-bg); }
+.tab.is-active{
+  color:var(--cream-white);
+  background:var(--brown);
+}
+.tab-panel{ display:none; }
+.tab-panel.is-active{ display:block; }
+
+/* ---------- Book Cards ---------- */
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(250px,1fr));
+  gap:18px;
+}
+.book-card{
+  background:var(--cream-white);
+  border:var(--border) solid var(--brown);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:var(--shadow-warm);
+  display:flex; flex-direction:column; gap:9px;
+  position:relative;
+  transition: transform .15s ease;
+}
+.book-card:hover{ transform:translate(-2px,-2px); }
+.book-card__top{ display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+.book-card__cat{
+  font-family:var(--font-mono);
+  font-size:.66rem;
+  font-weight:700;
+  color:var(--brown);
+  background:var(--mustard-bg);
+  border:1.5px solid var(--brown);
+  border-radius:999px;
+  padding:3px 10px;
+  white-space:nowrap;
+}
+.book-card__delete{
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:.9rem;
+  color:var(--brown-soft);
+  padding:2px 5px;
+  border-radius:999px;
+  line-height:1;
+  flex-shrink:0;
+}
+.book-card__delete:hover{ color:var(--rust); background:var(--rust-bg); }
+.book-card h3{
+  font-family:var(--font-display);
+  font-size:1.02rem;
+  font-weight:400;
+  margin:0;
+  color:var(--brown);
+  line-height:1.4;
+}
+.book-card__author{
+  font-size:.85rem;
+  color:var(--brown-soft);
+  margin:0;
+}
+.book-card__meta{
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  color:var(--brown-soft);
+  margin:0;
+}
+.book-card__footer{
+  margin-top:auto;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; padding-top:12px;
+  border-top:2px dashed var(--cream-dark);
+}
+
+/* ตราประทับสถานะ: ให้ความรู้สึกเหมือนตราปั๊มยางวินเทจ */
+.stamp{
+  font-family:var(--font-mono);
+  font-weight:700;
+  font-size:.68rem;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  padding:5px 12px;
+  border-radius:999px;
+  border:2px dashed currentColor;
+  transform:rotate(-4deg);
+  display:inline-block;
+}
+.stamp--available{ color:var(--avocado); background:var(--avocado-bg); }
+.stamp--borrowed{ color:var(--rust); background:var(--rust-bg); }
+
+.empty-state{
+  text-align:center;
+  color:var(--brown-soft);
+  padding:40px 0;
+  font-size:.92rem;
+  font-family:var(--font-mono);
+}
+
+/* ---------- History table ---------- */
+.history-table-wrap{
+  background:var(--cream-white);
+  border:var(--border) solid var(--brown);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-warm);
+}
+.history-table{ width:100%; border-collapse:collapse; font-size:.87rem; }
+.history-table th{
+  text-align:left;
+  font-family:var(--font-mono);
+  font-size:.7rem;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--cream-white);
+  background:var(--brown);
+  padding:11px 14px;
+}
+.history-table td{
+  padding:11px 14px;
+  border-bottom:2px dashed var(--cream-dark);
+}
+.history-table tr:last-child td{ border-bottom:none; }
+.history-tag{
+  font-family:var(--font-mono);
+  font-size:.7rem;
+  font-weight:700;
+  padding:2px 9px;
+  border-radius:999px;
+}
+.history-tag--borrow{ background:var(--rust-bg); color:var(--rust); }
+.history-tag--return{ background:var(--avocado-bg); color:var(--avocado); }
+
+/* ---------- Footer ---------- */
+.site-footer{
+  text-align:center;
+  padding:26px;
+  font-size:.78rem;
+  color:var(--brown-soft);
+  font-family:var(--font-mono);
+}
+
+/* ---------- Modal ---------- */
+.modal-backdrop{
+  position:fixed; inset:0;
+  background:rgba(74,54,38,.55);
+  display:none;
+  align-items:center; justify-content:center;
+  padding:20px;
+  z-index:100;
+}
+.modal-backdrop.is-open{ display:flex; }
+.modal{
+  background:var(--cream-white);
+  border-radius:var(--radius-lg);
+  padding:30px 28px;
+  max-width:400px; width:100%;
+  position:relative;
+  box-shadow:7px 7px 0 0 var(--brown);
+}
+.card-stamp{
+  border:var(--border) solid var(--brown);
+}
+.card-stamp::before{
+  content:"";
+  position:absolute;
+  top:-14px; right:-14px;
+  width:36px; height:36px;
+  background:var(--mustard);
+  border:2px solid var(--brown);
+  border-radius:50%;
+  pointer-events:none;
+}
+.modal__close{
+  position:absolute; top:14px; right:16px;
+  background:none; border:none;
+  font-size:1.1rem; cursor:pointer; color:var(--brown-soft);
+}
+.modal__close:hover{ color:var(--rust); }
+.modal__desc{ font-size:.88rem; color:var(--brown-soft); margin:10px 0 0; }
+.modal__btn-row{ display:flex; gap:10px; margin-top:22px; }
+.modal form{ display:flex; flex-direction:column; gap:15px; margin-top:16px; }
+.modal label{
+  display:flex; flex-direction:column; gap:6px;
+  font-size:.85rem; font-weight:600; color:var(--brown);
+}
+.modal input{
+  border:2px solid var(--brown);
+  border-radius:var(--radius);
+  padding:11px 14px;
+  font-family:var(--font-body);
+  font-size:.92rem;
+  color:var(--brown);
+  background:var(--cream-white);
+}
+.modal input:focus{ outline:2px solid var(--rust); outline-offset:1px; border-color:var(--rust); }
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed; bottom:22px; left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--brown); color:var(--cream);
+  padding:13px 22px;
+  border-radius:999px;
+  font-size:.86rem;
+  border-left:5px solid var(--avocado);
+  opacity:0; pointer-events:none;
+  transition:opacity .25s ease, transform .25s ease;
+  z-index:200;
+  max-width:90vw;
+  box-shadow:var(--shadow-warm);
+}
+.toast.is-visible{
+  opacity:1; transform:translateX(-50%) translateY(0);
+}
+.toast.is-error{ border-left-color:var(--rust); }
+
+/* ---------- Responsive ---------- */
+@media (max-width:560px){
+  .ticket-header__inner{ flex-direction:column; text-align:center; }
+  .toolbar{ flex-direction:column; }
+  .card-grid{ grid-template-columns:1fr; }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce){
+  .btn, .toast, .conn-dot, .book-card{ transition:none; }
+}
