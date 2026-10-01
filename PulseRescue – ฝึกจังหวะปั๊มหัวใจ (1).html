@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PulseRescue – ฝึกจังหวะปั๊มหัวใจ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0f1a; --bg2:#121c2e; --track:#1d2c44;
+    --red:#ef4444; --teal:#2dd4bf; --amber:#f5a623;
+    --text:#e8edf5; --dim:#8b98b3;
+    --font:'Manrope', system-ui, -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100dvh; background:var(--bg); color:var(--text);
+    font-family:var(--font); display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:16px; overflow:hidden; user-select:none;
+    padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(14px + env(safe-area-inset-bottom,0px));
+  }
+  .hud{ width:min(420px,92vw); display:flex; justify-content:space-between; gap:10px; }
+  .stat{ text-align:center; flex:1; }
+  .stat .v{ font-size:20px; font-weight:800; }
+  .stat .l{ font-size:11px; color:var(--dim); }
+  .perfusion-wrap{ width:min(420px,92vw); }
+  .perfusion-label{ display:flex; justify-content:space-between; font-size:12px; color:var(--dim); margin-bottom:5px; }
+  .perfusion-bar{ height:10px; border-radius:6px; background:var(--track); overflow:hidden; }
+  .perfusion-fill{ height:100%; width:0%; background:linear-gradient(90deg,#0d9488,var(--teal)); transition:width .12s linear; }
+  .stage{ position:relative; width:260px; height:260px; display:flex; align-items:center; justify-content:center; }
+  .torso{
+    position:absolute; width:220px; height:220px; border-radius:38%;
+    background:radial-gradient(circle at 35% 30%, var(--bg2), #0d1524 75%);
+    box-shadow:0 0 0 1px #1a2740, 0 30px 60px -25px #000;
+  }
+  .ring{
+    position:absolute; top:50%; left:50%; width:130px; height:130px; border-radius:50%;
+    border:3px solid var(--red); transform:translate(-50%,-50%) scale(1); opacity:.2; pointer-events:none;
+  }
+  .target{
+    position:relative; width:130px; height:130px; border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #ffffff12, transparent 60%), #1a2740;
+    border:2px solid #2c3f5e; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; touch-action:none; transition:transform .08s ease, background .08s ease;
+  }
+  .target::before{ content:"+"; font-size:34px; font-weight:800; color:var(--dim); }
+  .target.pressed{ transform:scale(.9); background:#26243a; border-color:var(--red); }
+  .target.pressed::before{ color:var(--red); }
+  .feedback{
+    position:absolute; top:-38px; left:50%; transform:translateX(-50%) translateY(6px) scale(.85);
+    font-weight:800; font-size:15px; opacity:0; white-space:nowrap; pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease;
+  }
+  .feedback.show{ opacity:1; transform:translateX(-50%) translateY(-6px) scale(1); }
+  .feedback.perfect{ color:var(--teal); } .feedback.good{ color:#93c5fd; }
+  .feedback.warn{ color:var(--amber); } .feedback.bad{ color:var(--red); }
+  .hint{ max-width:340px; text-align:center; font-size:13px; color:var(--dim); line-height:1.5; margin:0; }
+
+  .rhythm-bar{ position:relative; width:min(420px,92vw); height:34px; background:var(--track); border-radius:8px; overflow:hidden; }
+  .rhythm-zone{ position:absolute; top:0; bottom:0; left:0; background:linear-gradient(90deg, rgba(45,212,191,.4), rgba(45,212,191,.04)); border-right:2px solid var(--teal); }
+  .rhythm-marker{ position:absolute; top:2px; bottom:2px; width:4px; border-radius:2px; background:var(--red); box-shadow:0 0 8px var(--red); }
+  .stats-grid{ width:min(420px,92vw); display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .stats-grid .item{ background:#101a2c; border:1px solid #1e2c46; border-radius:10px; padding:7px 4px; text-align:center; }
+  .stats-grid .item .v{ font-size:15px; font-weight:800; }
+  .stats-grid .item .l{ font-size:10px; color:var(--dim); margin-top:2px; }
+  .history{ width:100%; max-width:320px; text-align:left; }
+  .history .row{ display:flex; justify-content:space-between; font-size:12px; color:var(--dim); padding:3px 0; border-bottom:1px solid #1c2740; }
+  .history .row span:first-child{ color:var(--text); }
+
+  .cam-pip{
+    position:fixed; top:calc(12px + env(safe-area-inset-top,0px)); right:12px;
+    width:150px; height:112px; border-radius:12px; overflow:hidden; background:#000;
+    border:1px solid #24354f; display:none; z-index:5;
+  }
+  .cam-pip.on{ display:block; }
+  .cam-pip video, .cam-pip canvas{ position:absolute; top:0; left:0; width:100%; height:100%; transform:scaleX(-1); }
+  .cam-status{
+    position:absolute; bottom:4px; left:0; right:0; text-align:center; font-size:10px;
+    padding:2px 0; background:#000a; color:var(--text);
+  }
+
+  .overlay{
+    position:fixed; inset:0; background:#070b13ee; display:flex; align-items:center;
+    justify-content:center; flex-direction:column; gap:14px; text-align:center; padding:24px; z-index:10;
+  }
+  .overlay.hidden{ display:none; }
+  .overlay h1{ font-size:21px; margin:0; }
+  .overlay p{ color:var(--dim); font-size:14px; max-width:320px; margin:0; line-height:1.6; }
+  .choice-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .choice{
+    font-family:var(--font); font-weight:700; font-size:13px; color:var(--text);
+    background:#141f34; border:2px solid #26385a; padding:10px 16px; border-radius:12px; cursor:pointer;
+  }
+  .choice.active{ border-color:var(--teal); background:#123330; color:var(--teal); }
+  button.primary{
+    font-family:var(--font); font-weight:800; font-size:15px; color:#06251f;
+    background:var(--teal); border:none; padding:13px 30px; border-radius:30px; cursor:pointer;
+  }
+  button.primary:disabled{ opacity:.5; cursor:default; }
+  button.ghost{
+    font-family:var(--font); font-weight:700; font-size:13px; color:var(--text);
+    background:transparent; border:1px solid #2c3f5e; padding:9px 18px; border-radius:20px; cursor:pointer;
+  }
+  .results-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 26px; text-align:left; }
+  .results-grid div.k{ color:var(--dim); font-size:12px; }
+  .results-grid div.v{ font-weight:800; font-size:17px; }
+  .grade{ font-size:46px; font-weight:800; color:var(--teal); }
+</style>
+</head>
+<body>
+
+  <div class="hud">
+    <div class="stat"><div class="v" id="hudTimer">60s</div><div class="l">เวลา</div></div>
+    <div class="stat"><div class="v" id="hudCombo">0</div><div class="l">คอมโบ</div></div>
+    <div class="stat"><div class="v">108</div><div class="l">BPM เป้าหมาย</div></div>
+  </div>
+
+  <div class="perfusion-wrap">
+    <div class="perfusion-label"><span>การไหลเวียนเลือด (Perfusion)</span><span id="hudPerfusion">0%</span></div>
+    <div class="perfusion-bar"><div class="perfusion-fill" id="perfusionFill"></div></div>
+  </div>
+
+  <div class="stage">
+    <div class="torso"></div>
+    <div class="ring" id="ring"></div>
+    <div class="target" id="target"><span class="feedback" id="feedback"></span></div>
+  </div>
+
+  <div class="rhythm-bar" id="rhythmBar">
+    <div class="rhythm-zone" id="rhythmZone"></div>
+    <div class="rhythm-marker" id="rhythmMarker"></div>
+  </div>
+
+  <div class="stats-grid" id="statsGrid">
+    <div class="item"><div class="v" id="spPerfect">0</div><div class="l">ตรงจังหวะ</div></div>
+    <div class="item"><div class="v" id="spGood">0</div><div class="l">จังหวะดี</div></div>
+    <div class="item"><div class="v" id="spMiss">0</div><div class="l">พลาดจังหวะ</div></div>
+    <div class="item"><div class="v" id="spShallow">0</div><div class="l">ตื้นไป</div></div>
+    <div class="item"><div class="v" id="spDeep">0</div><div class="l">ลึกไป</div></div>
+    <div class="item"><div class="v" id="spOffset">0ms</div><div class="l">แนวโน้มจังหวะ</div></div>
+  </div>
+
+  <p class="hint" id="hint">กดค้างไว้ตอนวงแหวนหดมาชนเป้า แล้วปล่อยเมื่อกดลึกพอ — ใช้เมาส์/นิ้วแตะที่วงกลม หรือกดค้าง Space</p>
+
+  <div class="cam-pip" id="camPip">
+    <video id="video" autoplay muted playsinline></video>
+    <canvas id="overlayCanvas"></canvas>
+    <div class="cam-status" id="camStatus">กำลังค้นหามือ…</div>
+  </div>
+
+  <div class="overlay" id="startOverlay">
+    <h1>PulseRescue — โหมดฝึกจังหวะปั๊ม</h1>
+    <p>คุณคือกู้ภัยมือใหม่ ผู้ป่วยหัวใจหยุดเต้นต้องได้รับ CPR ทันที กดให้ตรงจังหวะเสียงบี๊บ ด้วยความลึกที่พอดี รักษา Perfusion ให้สูงที่สุดใน 60 วินาที</p>
+
+    <div class="choice-row">
+      <button class="choice active" id="modeManual">🖱️ เล่นด้วยมือ (เมาส์/Space)</button>
+      <button class="choice" id="modeCamera">📷 เล่นด้วยกล้อง (จับมือจริง)</button>
+    </div>
+
+    <div class="choice-row" id="handRow" style="display:none">
+      <span style="font-size:13px;color:var(--dim);align-self:center">มือที่ถนัด:</span>
+      <button class="choice active" id="handRight">มือขวา</button>
+      <button class="choice" id="handLeft">มือซ้าย</button>
+    </div>
+
+    <p id="camNote" style="display:none;font-size:12px">ต้องอนุญาตให้ใช้กล้อง และต้องโหลดโมเดลตรวจจับมือจากอินเทอร์เน็ตครั้งแรก หากโหลดไม่สำเร็จระบบจะสลับเป็นโหมดมือให้อัตโนมัติ</p>
+
+    <button class="primary" id="startBtn">เริ่มฝึก</button>
+  </div>
+
+  <div class="overlay hidden" id="resultsOverlay">
+    <h1>สรุปผลการฝึก</h1>
+    <div class="grade" id="grade">B</div>
+    <div class="results-grid">
+      <div class="k">ความแม่นยำจังหวะ+ความลึก</div><div class="v" id="rAcc">0%</div>
+      <div class="k">Perfusion เฉลี่ยตอนจบ</div><div class="v" id="rPerf">0%</div>
+      <div class="k">คอมโบสูงสุด</div><div class="v" id="rCombo">0</div>
+      <div class="k">จำนวนครั้งที่กด</div><div class="v" id="rTotal">0</div>
+    </div>
+    <div class="history" id="historyList"></div>
+    <button class="primary" id="retryBtn">เล่นอีกครั้ง</button>
+  </div>
+
+<script type="module">
+  const BPM = 108;
+  const beatMs = 60000 / BPM;
+  const durationMs = 60000;
+  const decayPerSec = 1.6;
+  const DEPTH_SHALLOW = 0.35, DEPTH_DEEP = 0.85;
+
+  const ring = document.getElementById('ring');
+  const target = document.getElementById('target');
+  const feedback = document.getElementById('feedback');
+  const perfusionFill = document.getElementById('perfusionFill');
+  const hudPerfusion = document.getElementById('hudPerfusion');
+  const hudTimer = document.getElementById('hudTimer');
+  const hudCombo = document.getElementById('hudCombo');
+  const startOverlay = document.getElementById('startOverlay');
+  const resultsOverlay = document.getElementById('resultsOverlay');
+  const hint = document.getElementById('hint');
+  const camPip = document.getElementById('camPip');
+  const camStatus = document.getElementById('camStatus');
+  const video = document.getElementById('video');
+  const overlayCanvas = document.getElementById('overlayCanvas');
+  const octx = overlayCanvas.getContext('2d');
+  const rhythmBar = document.getElementById('rhythmBar');
+  const rhythmZone = document.getElementById('rhythmZone');
+  const rhythmMarker = document.getElementById('rhythmMarker');
+  const spPerfect = document.getElementById('spPerfect');
+  const spGood = document.getElementById('spGood');
+  const spMiss = document.getElementById('spMiss');
+  const spShallow = document.getElementById('spShallow');
+  const spDeep = document.getElementById('spDeep');
+  const spOffset = document.getElementById('spOffset');
+  const historyList = document.getElementById('historyList');
+
+  let running = false, isPressed = false;
+  let startTime = 0, lastTime = 0, pressStart = 0, lastBeatIndex = -1;
+  let perfusion = 0, combo = 0, maxCombo = 0, totalPresses = 0, goodPresses = 0;
+  let counts = { perfect: 0, good: 0, miss: 0, shallow: 0, deepC: 0 };
+  let offsetSum = 0, offsetCount = 0;
+  let fbTimer = null;
+  let inputMode = 'manual'; // 'manual' | 'camera'
+  let dominantHand = 'Right'; // 'Right' | 'Left'
+  let audioCtx = null;
+
+  // ---------- UI: mode + hand pickers ----------
+  const modeManualBtn = document.getElementById('modeManual');
+  const modeCameraBtn = document.getElementById('modeCamera');
+  const handRow = document.getElementById('handRow');
+  const handRight = document.getElementById('handRight');
+  const handLeft = document.getElementById('handLeft');
+  const camNote = document.getElementById('camNote');
+
+  modeManualBtn.addEventListener('click', () => {
+    inputMode = 'manual';
+    modeManualBtn.classList.add('active'); modeCameraBtn.classList.remove('active');
+    handRow.style.display = 'none'; camNote.style.display = 'none';
+  });
+  modeCameraBtn.addEventListener('click', () => {
+    inputMode = 'camera';
+    modeCameraBtn.classList.add('active'); modeManualBtn.classList.remove('active');
+    handRow.style.display = 'flex'; camNote.style.display = 'block';
+  });
+  handRight.addEventListener('click', () => { dominantHand = 'Right'; handRight.classList.add('active'); handLeft.classList.remove('active'); });
+  handLeft.addEventListener('click', () => { dominantHand = 'Left'; handLeft.classList.add('active'); handRight.classList.remove('active'); });
+
+  // ---------- audio metronome (Web Audio, no external files) ----------
+  function playClick(accent){
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.frequency.value = accent ? 1200 : 760;
+    osc.type = 'square';
+    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.25, audioCtx.currentTime + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.09);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+  }
+
+  // ---------- shared grading ----------
+  function showFeedback(msg, cls){
+    feedback.textContent = msg;
+    feedback.className = 'feedback show ' + cls;
+    clearTimeout(fbTimer);
+    fbTimer = setTimeout(() => feedback.classList.remove('show'), 420);
+  }
+
+  function getTimingGrade(pressTime){
+    const elapsed = pressTime - startTime;
+    const phase = elapsed % beatMs;
+    const late = phase < beatMs / 2; // pressed shortly after the previous beat
+    const offsetMs = late ? phase : -(beatMs - phase); // + = late, - = early
+    const absDelta = Math.abs(offsetMs);
+    const grade = absDelta <= 70 ? 'perfect' : absDelta <= 160 ? 'good' : 'miss';
+    return { grade, early: !late, offsetMs };
+  }
+
+  function updateStatsPanel(){
+    spPerfect.textContent = counts.perfect;
+    spGood.textContent = counts.good;
+    spMiss.textContent = counts.miss;
+    spShallow.textContent = counts.shallow;
+    spDeep.textContent = counts.deepC;
+    const avg = offsetCount ? Math.round(offsetSum / offsetCount) : 0;
+    spOffset.textContent = avg === 0 ? '0ms' : (avg > 0 ? '+' + avg + 'ms ช้า' : avg + 'ms เร็ว');
+  }
+
+  function applyGrades(timing, depthGrade){
+    totalPresses++;
+    offsetSum += timing.offsetMs; offsetCount++;
+    counts[timing.grade]++;
+    if (depthGrade === 'shallow') counts.shallow++;
+    else if (depthGrade === 'deep') counts.deepC++;
+    updateStatsPanel();
+
+    if (timing.grade === 'miss'){
+      showFeedback(timing.early ? 'เร็วไป' : 'ช้าไป', 'bad');
+      combo = 0; perfusion = Math.max(0, perfusion - 6);
+    } else if (depthGrade !== 'good'){
+      showFeedback(depthGrade === 'shallow' ? 'ตื้นไป' : 'ลึกไป', 'warn');
+      combo = 0; perfusion = Math.max(0, perfusion - 3);
+    } else {
+      combo++; maxCombo = Math.max(maxCombo, combo); goodPresses++;
+      const gain = timing.grade === 'perfect' ? 8 : 5;
+      perfusion = Math.min(100, perfusion + gain);
+      showFeedback(timing.grade === 'perfect' ? 'เพอร์เฟกต์!' : 'ดี', timing.grade === 'perfect' ? 'perfect' : 'good');
+    }
+  }
+
+  // ---------- manual input (mouse / touch / space) ----------
+  function onPressStart(e){
+    if (inputMode !== 'manual') return;
+    if (e && e.preventDefault) e.preventDefault();
+    if (!running || isPressed) return;
+    isPressed = true; pressStart = performance.now();
+    target.classList.add('pressed');
+  }
+  function onPressEnd(e){
+    if (inputMode !== 'manual') return;
+    if (e && e.preventDefault) e.preventDefault();
+    if (!running || !isPressed) return;
+    isPressed = false; target.classList.remove('pressed');
+    const holdMs = performance.now() - pressStart;
+    const depthGrade = holdMs < 110 ? 'shallow' : holdMs <= 260 ? 'good' : 'deep';
+    applyGrades(getTimingGrade(pressStart), depthGrade);
+  }
+  target.addEventListener('pointerdown', onPressStart);
+  window.addEventListener('pointerup', onPressEnd);
+  window.addEventListener('pointercancel', onPressEnd);
+  window.addEventListener('keydown', (e) => { if (e.code === 'Space' && !e.repeat){ e.preventDefault(); onPressStart(e); } });
+  window.addEventListener('keyup', (e) => { if (e.code === 'Space'){ e.preventDefault(); onPressEnd(e); } });
+
+  // ---------- camera hand-tracking ----------
+  let handLandmarker = null, cameraReady = false, camState = 'up', camPeak = 0, camPressTime = 0;
+  let sizeEnvMin = null, sizeEnvMax = null, yEnvMin = null, yEnvMax = null;
+  let smoothedDepth = 0, lastHandFrameTime = null, lastHandSeen = 0, depthInitialized = false;
+
+  async function initCamera(){
+    camStatus.textContent = 'กำลังเปิดกล้อง…';
+    camPip.classList.add('on');
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+    video.srcObject = stream;
+    await video.play();
+
+    camStatus.textContent = 'กำลังโหลดโมเดลตรวจจับมือ…';
+    const { HandLandmarker, FilesetResolver } = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/vision_bundle.mjs');
+    const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm');
+    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+        delegate: 'GPU'
+      },
+      runningMode: 'VIDEO', numHands: 2,
+      minHandDetectionConfidence: 0.3, minHandPresenceConfidence: 0.3, minTrackingConfidence: 0.3
+    });
+    overlayCanvas.width = 150; overlayCanvas.height = 112;
+    cameraReady = true;
+    camStatus.textContent = 'ตรวจพบมือ: กำลังค้นหา…';
+  }
+
+  function processHandFrame(now){
+    if (!cameraReady || !handLandmarker) return;
+    let result;
+    try { result = handLandmarker.detectForVideo(video, now); }
+    catch (err) { return; }
+
+    octx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+    if (!result.landmarks || result.landmarks.length === 0){
+      // brief occlusion / motion blur: hold the last known state for a short grace
+      // period instead of dropping the compression that's already in progress
+      if (now - lastHandSeen > 350){
+        camStatus.textContent = 'ไม่พบมือในเฟรม';
+        camState = 'up';
+      }
+      return;
+    }
+
+    // video is not mirrored in the raw feed but is displayed mirrored via CSS,
+    // so the user's real hand side is the opposite of MediaPipe's raw label.
+    let chosen = null, chosenSide = null;
+    for (let i = 0; i < result.landmarks.length; i++){
+      const rawSide = result.handedness[i][0].categoryName; // 'Left' | 'Right' (raw, unmirrored)
+      const userSide = rawSide === 'Left' ? 'Right' : 'Left';
+      if (userSide === dominantHand){ chosen = result.landmarks[i]; chosenSide = userSide; break; }
+      if (!chosen){ chosen = result.landmarks[i]; chosenSide = userSide; }
+    }
+    const ok = chosenSide === dominantHand;
+    lastHandSeen = now;
+
+    const wrist = chosen[0];
+    octx.fillStyle = ok ? '#2dd4bf' : '#f5a623';
+    for (const p of chosen){ octx.beginPath(); octx.arc(p.x * overlayCanvas.width, p.y * overlayCanvas.height, 2, 0, 7); octx.fill(); }
+
+    const dtSec = lastHandFrameTime ? Math.min(0.15, (now - lastHandFrameTime) / 1000) : 0.033;
+    lastHandFrameTime = now;
+
+    // Signal 1: hand-to-camera distance, via apparent hand size (wrist -> middle-finger MCP).
+    // Leaning the body toward the camera, or pushing the hand nearer it, grows this — this is
+    // what actually changes when someone "leans in" rather than moving the hand vertically.
+    const size = Math.hypot(chosen[9].x - chosen[0].x, chosen[9].y - chosen[0].y);
+    if (sizeEnvMin === null){ sizeEnvMin = size; sizeEnvMax = size; }
+    sizeEnvMax = Math.max(size, sizeEnvMax - 0.06 * dtSec);
+    sizeEnvMin = Math.min(size, sizeEnvMin + 0.06 * dtSec);
+    const sizeRange = Math.max(sizeEnvMax - sizeEnvMin, 0.02);
+    const sizeDepth = Math.min(1, Math.max(0, (size - sizeEnvMin) / sizeRange));
+
+    // Signal 2: wrist vertical position (proxy for a straight up-down pumping motion).
+    const y = wrist.y;
+    if (yEnvMin === null){ yEnvMin = y; yEnvMax = y; }
+    yEnvMax = Math.max(y, yEnvMax - 0.15 * dtSec);
+    yEnvMin = Math.min(y, yEnvMin + 0.15 * dtSec);
+    const yRange = Math.max(yEnvMax - yEnvMin, 0.08);
+    const yDepth = Math.min(1, Math.max(0, (y - yEnvMin) / yRange));
+
+    const rawDepth = 0.65 * sizeDepth + 0.35 * yDepth;
+    smoothedDepth = depthInitialized ? smoothedDepth + 0.35 * (rawDepth - smoothedDepth) : rawDepth;
+    depthInitialized = true;
+    const depth = smoothedDepth;
+
+    camStatus.textContent = 'มือ: ' + (chosenSide === 'Right' ? 'ขวา' : 'ซ้าย') + (ok ? ' ✅' : ' ⚠') + ' | ลึก ' + Math.round(depth * 100) + '%';
+
+    if (!running) return;
+
+    if (camState === 'up' && depth > 0.4){
+      camState = 'down'; camPressTime = performance.now(); camPeak = depth;
+    } else if (camState === 'down'){
+      camPeak = Math.max(camPeak, depth);
+      if (depth < 0.2){
+        camState = 'up';
+        const depthGrade = camPeak < DEPTH_SHALLOW ? 'shallow' : camPeak <= DEPTH_DEEP ? 'good' : 'deep';
+        target.classList.add('pressed');
+        setTimeout(() => target.classList.remove('pressed'), 90);
+        applyGrades(getTimingGrade(camPressTime), depthGrade);
+        camPeak = 0;
+      }
+    }
+  }
+
+  // ---------- main loop ----------
+  function updateHUD(elapsed){
+    hudTimer.textContent = Math.max(0, Math.ceil((durationMs - elapsed) / 1000)) + 's';
+    hudCombo.textContent = combo;
+    perfusionFill.style.width = perfusion.toFixed(0) + '%';
+    hudPerfusion.textContent = perfusion.toFixed(0) + '%';
+  }
+
+  function frame(now){
+    if (inputMode === 'camera') processHandFrame(now);
+
+    if (running){
+      const elapsed = now - startTime;
+      const dt = now - lastTime; lastTime = now;
+      if (elapsed >= durationMs){ endGame(); requestAnimationFrame(frame); return; }
+
+      const phase = elapsed % beatMs;
+      const t = (beatMs - phase) / beatMs;
+      ring.style.transform = `translate(-50%,-50%) scale(${(1 + 1.3 * t).toFixed(3)})`;
+      ring.style.opacity = (0.15 + 0.55 * (1 - t)).toFixed(2);
+
+      const barWidth = rhythmBar.clientWidth;
+      const pxPerMs = barWidth / beatMs;
+      rhythmZone.style.width = Math.min(barWidth, 160 * pxPerMs) + 'px';
+      rhythmMarker.style.left = Math.min(barWidth - 4, t * barWidth) + 'px';
+
+      const beatIndex = Math.floor(elapsed / beatMs);
+      if (beatIndex !== lastBeatIndex){ lastBeatIndex = beatIndex; playClick(beatIndex % 4 === 0); }
+
+      perfusion = Math.max(0, perfusion - decayPerSec * (dt / 1000));
+      updateHUD(elapsed);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function renderHistory(list){
+    if (!list || !list.length){ historyList.innerHTML = ''; return; }
+    historyList.innerHTML =
+      '<div class="row" style="border-bottom:none"><span>ครั้งก่อนหน้า</span><span>แม่นยำ / เกรด</span></div>' +
+      list.map(h => {
+        const time = new Date(h.t).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+        return `<div class="row"><span>${time} (${h.mode === 'camera' ? 'กล้อง' : 'มือ'})</span><span>${h.acc}% / ${h.grade}</span></div>`;
+      }).join('');
+  }
+
+  function saveHistory(entry){
+    try {
+      const raw = localStorage.getItem('pulserescue_history');
+      const list = raw ? JSON.parse(raw) : [];
+      list.unshift(entry);
+      const trimmed = list.slice(0, 8);
+      localStorage.setItem('pulserescue_history', JSON.stringify(trimmed));
+      renderHistory(trimmed);
+    } catch (err){ renderHistory([]); }
+  }
+
+  function endGame(){
+    running = false;
+    const accuracy = totalPresses ? Math.round((goodPresses / totalPresses) * 100) : 0;
+    document.getElementById('rAcc').textContent = accuracy + '%';
+    document.getElementById('rPerf').textContent = perfusion.toFixed(0) + '%';
+    document.getElementById('rCombo').textContent = maxCombo;
+    document.getElementById('rTotal').textContent = totalPresses;
+    const score = accuracy * 0.6 + perfusion * 0.4;
+    const grade = score >= 90 ? 'S' : score >= 75 ? 'A' : score >= 55 ? 'B' : score >= 35 ? 'C' : 'D';
+    document.getElementById('grade').textContent = grade;
+    resultsOverlay.classList.remove('hidden');
+    saveHistory({
+      t: Date.now(), acc: accuracy, grade, mode: inputMode,
+      offset: offsetCount ? Math.round(offsetSum / offsetCount) : 0,
+      shallow: counts.shallow, deepC: counts.deepC
+    });
+  }
+
+  function resetState(){
+    perfusion = 0; combo = 0; maxCombo = 0; totalPresses = 0; goodPresses = 0;
+    counts = { perfect: 0, good: 0, miss: 0, shallow: 0, deepC: 0 };
+    offsetSum = 0; offsetCount = 0;
+    lastBeatIndex = -1; camState = 'up'; camPeak = 0;
+    sizeEnvMin = null; sizeEnvMax = null; yEnvMin = null; yEnvMax = null;
+    smoothedDepth = 0; depthInitialized = false; lastHandFrameTime = null; lastHandSeen = 0;
+    updateHUD(0); updateStatsPanel();
+  }
+
+  async function startGame(){
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+    if (inputMode === 'camera' && !cameraReady){
+      const startBtn = document.getElementById('startBtn');
+      startBtn.disabled = true; startBtn.textContent = 'กำลังเตรียมกล้อง…';
+      try {
+        await initCamera();
+      } catch (err){
+        camStatus.textContent = 'เปิดกล้องไม่สำเร็จ';
+        camPip.classList.remove('on');
+        inputMode = 'manual';
+        hint.textContent = 'ไม่สามารถเข้าถึงกล้องหรือโหลดระบบตรวจจับมือได้ สลับเป็นโหมดกดด้วยมือ/คีย์บอร์ดแทน';
+      }
+      startBtn.disabled = false; startBtn.textContent = 'เริ่มฝึก';
+    }
+
+    if (inputMode === 'manual'){
+      hint.textContent = 'กดค้างไว้ตอนวงแหวนหดมาชนเป้า แล้วปล่อยเมื่อกดลึกพอ — ใช้เมาส์/นิ้วแตะที่วงกลม หรือกดค้าง Space';
+      camPip.classList.remove('on');
+    } else {
+      hint.textContent = 'ยกมือที่ถนัดขึ้นแล้วปั๊มลง-ขึ้นให้ตรงเสียงบี๊บ กล้องจะวัดจังหวะและความลึกจากการเคลื่อนไหวของมือ';
+    }
+
+    resetState();
+    startOverlay.classList.add('hidden');
+    resultsOverlay.classList.add('hidden');
+    running = true;
+    startTime = performance.now();
+    lastTime = startTime;
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('retryBtn').addEventListener('click', startGame);
+
+  try {
+    const raw = localStorage.getItem('pulserescue_history');
+    if (raw) renderHistory(JSON.parse(raw));
+  } catch (err){ /* storage unavailable, ignore */ }
+
+  requestAnimationFrame(frame);
+</script>
+</body>
+</html>
